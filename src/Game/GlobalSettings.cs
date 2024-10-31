@@ -7,9 +7,13 @@ namespace Stella.Game;
 
 public static class GlobalSettings
 {
+    public static uint AntialiasingLevel { get; set; } = 3;
+    
+    public static string? GeneratedPerlinSavePath => null;
+    
     public static string ResourcesDirectory { get; private set; }
     public static string TilesSpriteDirectory { get; private set; }
-
+    
 
     static GlobalSettings()
     {

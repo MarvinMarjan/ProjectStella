@@ -1,7 +1,7 @@
 using SFML.System;
 
 
-namespace Stella.Game;
+namespace Stella.Game.Tiles;
 
 
 public class Tile

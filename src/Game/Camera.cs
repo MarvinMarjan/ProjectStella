@@ -18,7 +18,10 @@ public class Camera(GameWindow window)
     public float MouseScrollDelta { get; set; }
 
     public const float ZoomOutFactor = 1.3f; 
-    public const float ZoomInFactor = 0.7f; 
+    public const float ZoomInFactor = 0.7f;
+
+    public const float MaxZoomOut = 5000f;
+    public const float MaxZoomIn = 420f;
 
     public bool IsGrabbingView => Window.HasFocus() && Mouse.IsButtonPressed(Mouse.Button.Right);
 
@@ -28,8 +31,8 @@ public class Camera(GameWindow window)
         if (IsGrabbingView)
             Window.CurrentView.Move(WorldMouseDelta);
 
-        bool atMinSize = Window.CurrentView.Size.X <= 420;
-        bool atMaxSize = Window.CurrentView.Size.X >= 5000;
+        bool atMinSize = Window.CurrentView.Size.X <= MaxZoomIn;
+        bool atMaxSize = Window.CurrentView.Size.X >= MaxZoomOut;
         
         if (MouseScrollDelta != 0f && (MouseScrollDelta > 0 ? !atMinSize : !atMaxSize))
         {

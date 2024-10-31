@@ -2,6 +2,8 @@ using SFML.System;
 using SFML.Window;
 using SFML.Graphics;
 
+using Stella.Game.World;
+
 
 namespace Stella.Game;
 
@@ -11,7 +13,7 @@ namespace Stella.Game;
 /// </summary>
 public class GameWindow : RenderWindow
 {
-    public required World World { get; set; }
+    public required TileWorld World { get; init; }
     public Camera Camera { get; }
     
     public View CurrentView { get; set; }
@@ -19,7 +21,7 @@ public class GameWindow : RenderWindow
     
     public GameWindow() : base(VideoMode.FullscreenModes[0], "Project Stella", Styles.Default, new()
     {
-        AntialiasingLevel = 2
+        AntialiasingLevel = GlobalSettings.AntialiasingLevel
     })
     {
         SetVerticalSyncEnabled(true);

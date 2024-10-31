@@ -4,7 +4,7 @@ using SFML.System;
 using SFML.Graphics;
 
 
-namespace Stella.Game;
+namespace Stella.Game.Tiles;
 
 
 public class TileDrawable(Texture source) : Sprite(source), ICloneable

@@ -1,23 +1,18 @@
-﻿using System.IO;
-
-using SFML.Graphics;
-
-
-namespace Stella.Game;
+﻿using Stella.Game;
+using Stella.Game.World;
 
 
-class Game
+namespace Stella;
+
+
+class GameProgram
 {
     private static void Main(string[] args)
     {
         GameWindow window = new()
         {
-            World = new World(new(150, 150), 45)
+            World = new WorldGeneration(10).GenerateWorld(new(500, 500))
         };
-
-        TileDrawable drawable = new(Path.Combine(GlobalSettings.TilesSpriteDirectory, "grass/grass1.png"));
-        
-        window.World.FillAllWith(drawable);
         
         while (window.IsOpen)
         {

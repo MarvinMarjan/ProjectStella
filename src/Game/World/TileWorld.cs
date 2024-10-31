@@ -1,18 +1,23 @@
 using SFML.System;
-using SFML.Graphics;
+
+using Stella.Game.Tiles;
 
 
-namespace Stella.Game;
+namespace Stella.Game.World;
 
 
-public class World
+public class TileWorld
 {
+    public const int DefaultTileSize = 16;
+    
     public Tile[,] Tiles { get; }
+    public Vector2i Size { get; }
 
     
-    public World(Vector2i worldSize, int tileSize)
+    public TileWorld(Vector2i worldSize, int tileSize = DefaultTileSize)
     {
         Tiles = new Tile[worldSize.X, worldSize.Y];
+        Size = worldSize;
 
         InitializeTileArray(worldSize, tileSize);
     }
