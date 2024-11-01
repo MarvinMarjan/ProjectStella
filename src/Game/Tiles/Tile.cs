@@ -35,6 +35,12 @@ public class Tile
     }
 
 
+    public void Update(GameWindow window)
+    {
+        Object?.Update(window);
+    }
+
+
     public void Draw(GameWindow window)
     {
         Object?.Draw(window);

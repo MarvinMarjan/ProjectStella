@@ -20,7 +20,7 @@ public class Camera(GameWindow window)
     public const float ZoomOutFactor = 1.3f; 
     public const float ZoomInFactor = 0.7f;
 
-    public const float MaxZoomOut = 5000f;
+    public const float MaxZoomOut = 6000f;
     public const float MaxZoomIn = 420f;
 
     public bool IsGrabbingView => Window.HasFocus() && Mouse.IsButtonPressed(Mouse.Button.Right);

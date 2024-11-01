@@ -37,20 +37,20 @@ public class WorldGeneration(int seed)
         => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
 
-    public TileWorld GenerateWorld(Vector2u worldSize)
+    public TileWorld GenerateWorld(GameWindow window, Vector2u worldSize)
     {
         float[,] noise = GenerateNoise(worldSize);
 
         if (GlobalSettings.GeneratedPerlinSavePath is not null)
             PerlinNoiseUtils.SaveNoiseToFile(noise, GlobalSettings.GeneratedPerlinSavePath);
         
-        return WorldFromNoise(noise);
+        return WorldFromNoise(window, noise);
     }
 
 
-    public static TileWorld WorldFromNoise(float[,] noise)
+    public static TileWorld WorldFromNoise(GameWindow window, float[,] noise)
     {
-        TileWorld world = new(new(noise.GetLength(1), noise.GetLength(0)));
+        TileWorld world = new(window, new(noise.GetLength(1), noise.GetLength(0)));
 
         for (int row = 0; row < world.Size.Y; row++)
             for (int col = 0; col < world.Size.X; col++)

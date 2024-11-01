@@ -13,7 +13,7 @@ namespace Stella.Game;
 /// </summary>
 public class GameWindow : RenderWindow
 {
-    public required TileWorld World { get; init; }
+    public TileWorld? World { get; set; }
     public Camera Camera { get; }
     
     public View CurrentView { get; set; }
@@ -25,7 +25,7 @@ public class GameWindow : RenderWindow
     })
     {
         SetVerticalSyncEnabled(true);
-
+        
         Camera = new(this);
 
         CurrentView = GetView();
@@ -49,7 +49,7 @@ public class GameWindow : RenderWindow
     {
         Clear();
         
-        World.DrawAll(this);
+        World?.Draw(this);
         
         Display();
     }
