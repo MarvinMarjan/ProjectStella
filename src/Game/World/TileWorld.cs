@@ -16,7 +16,7 @@ public class TileWorld
     
     public TileWorld(Vector2i worldSize, int tileSize = DefaultTileSize)
     {
-        Tiles = new Tile[worldSize.X, worldSize.Y];
+        Tiles = new Tile[worldSize.Y, worldSize.X];
         Size = worldSize;
 
         InitializeTileArray(worldSize, tileSize);

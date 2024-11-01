@@ -9,6 +9,8 @@ namespace Stella.Game.Tiles;
 
 public class TileDrawable(Texture source) : Sprite(source), ICloneable
 {
+    // TODO: optimize; add IsVisible and use asynchrone code to update these
+    
     public TileDrawable(string sourcePath) : this(new Texture(sourcePath))
     {}
     

@@ -9,7 +9,7 @@ public static class GlobalSettings
 {
     public static uint AntialiasingLevel { get; set; } = 3;
     
-    public static string? GeneratedPerlinSavePath => null;
+    public static string? GeneratedPerlinSavePath => Path.Combine(Environment.CurrentDirectory, "test.png");
     
     public static string ResourcesDirectory { get; private set; }
     public static string TilesSpriteDirectory { get; private set; }

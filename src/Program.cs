@@ -11,7 +11,7 @@ class GameProgram
     {
         GameWindow window = new()
         {
-            World = new WorldGeneration(10).GenerateWorld(new(500, 500))
+            World = new WorldGeneration(100).GenerateWorld(new(500, 500))
         };
         
         while (window.IsOpen)
