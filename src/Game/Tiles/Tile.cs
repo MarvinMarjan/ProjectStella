@@ -6,8 +6,8 @@ namespace Stella.Game.Tiles;
 
 public class Tile
 {
-    public Vector2f Position { get; init; }
-    public int Size { get; init; }
+    public Vector2f Position { get; }
+    public int Size { get; }
 
     private TileDrawable? _object;
     public TileDrawable? Object
@@ -32,18 +32,6 @@ public class Tile
         Size = size;
         
         Object = @object;
-    }
-
-
-    public void Update(GameWindow window)
-    {
-        Object?.Update(window);
-    }
-
-
-    public void Draw(GameWindow window)
-    {
-        Object?.Draw(window);
     }
 
 

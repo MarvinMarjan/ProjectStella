@@ -32,11 +32,7 @@ public class WorldGeneration(int seed)
         return noise;
     }
 
-
-    public float[,] GenerateNoise(Vector2u worldSize)
-        => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
-
-
+    
     public TileWorld GenerateWorld(GameWindow window, Vector2u worldSize)
     {
         float[,] noise = GenerateNoise(worldSize);
@@ -47,7 +43,11 @@ public class WorldGeneration(int seed)
         return WorldFromNoise(window, noise);
     }
 
+    
+    public float[,] GenerateNoise(Vector2u worldSize)
+        => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
+    
     public static TileWorld WorldFromNoise(GameWindow window, float[,] noise)
     {
         TileWorld world = new(window, new(noise.GetLength(1), noise.GetLength(0)));

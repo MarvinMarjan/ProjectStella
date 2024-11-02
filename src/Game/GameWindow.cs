@@ -1,7 +1,10 @@
+using System;
+using System.IO;
 using SFML.System;
 using SFML.Window;
 using SFML.Graphics;
 
+using Stella.Game.Tiles;
 using Stella.Game.World;
 
 
@@ -14,9 +17,10 @@ namespace Stella.Game;
 public class GameWindow : RenderWindow
 {
     public TileWorld? World { get; set; }
+    public TileSet TileSet { get; set; }
     public Camera Camera { get; }
     
-    public View CurrentView { get; set; }
+    public View View { get; set; }
     
     
     public GameWindow() : base(VideoMode.FullscreenModes[0], "Project Stella", Styles.Default, new()
@@ -25,10 +29,14 @@ public class GameWindow : RenderWindow
     })
     {
         SetVerticalSyncEnabled(true);
-        
-        Camera = new(this);
 
-        CurrentView = GetView();
+        TileSet = new(8, 8, TileWorld.DefaultTileSize);
+        TileSet.LoadFromTileIndex();
+        TileSet.SaveToFile(Path.Combine(Environment.CurrentDirectory, "tileset.png"));
+        
+        View = GetView();
+
+        Camera = new(this);
         
         Closed += (_, _) => Close();
         Resized += (_, args) => ResizeViewToFitScreenSize(new(args.Width, args.Height));
@@ -41,7 +49,9 @@ public class GameWindow : RenderWindow
         DispatchEvents();
         
         Camera.Update();
-        SetView(CurrentView);
+        SetView(View);
+        
+        World?.Update(this);
     }
 
 

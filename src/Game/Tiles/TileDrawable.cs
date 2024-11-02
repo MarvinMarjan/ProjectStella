@@ -7,26 +7,29 @@ using SFML.Graphics;
 namespace Stella.Game.Tiles;
 
 
-public class TileDrawable(Texture source) : Sprite(source), ICloneable
+public class TileDrawable : Sprite, ICloneable
 {
+    public string Name { get; }
     public bool IsVisible { get; private set; }
 
-
-    public TileDrawable(string sourcePath) : this(new Texture(sourcePath))
-    {}
+    public TileTextureAnimation TileTextureAnimation { get; }
     
-    public TileDrawable() : this(new Texture(1, 1))
-    {}
+
+    // TODO: cloning the texture may be important; test if it's behaving as a reference
+    public TileDrawable(string name) : this(name, new(TileIndex.LoadedTiles[name]))
+    { }
+
+
+    private TileDrawable(string name, TileTextureAnimation source) : base(source[0])
+    {
+        Name = name;
+        TileTextureAnimation = source;
+    }
 
 
     public void Update(GameWindow window)
     {
-        View windowView = window.CurrentView;
-
-        Vector2f windowPosition = windowView.Center - windowView.Size / 2;
-        FloatRect windowViewRect = new(windowPosition, windowView.Size);
-
-        IsVisible = GetGlobalBounds().Intersects(windowViewRect);
+        IsVisible = window.Camera.IsRectVisibleToCamera(GetGlobalBounds());
     }
 
 
@@ -39,11 +42,11 @@ public class TileDrawable(Texture source) : Sprite(source), ICloneable
 
     public void SetScaleToPixels(Vector2f size)
     {
-        FloatRect localBounds = GetLocalBounds();
+        FloatRect localBounds = GetGlobalBounds();
         Scale = new(size.X / localBounds.Width, size.Y / localBounds.Height);
     }
 
 
     public object Clone()
-        => new TileDrawable(Texture);
+        => new TileDrawable(Name, TileTextureAnimation);
 }

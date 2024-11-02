@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+
 using Stella.Game;
 using Stella.Game.World;
 
@@ -20,7 +21,7 @@ class GameProgram
         
         Console.WriteLine("Starting world generation.");
         
-        window.World = new WorldGeneration(100).GenerateWorld(window, new(500, 500));
+        window.World = new WorldGeneration(new Random().Next()).GenerateWorld(window, new(128, 128));
         window.World.StartUpdateThread();
         
         Console.WriteLine($"World generated after {timer.Elapsed.TotalSeconds:F3} seconds.");
