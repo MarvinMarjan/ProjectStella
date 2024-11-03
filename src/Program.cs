@@ -21,7 +21,7 @@ class GameProgram
         
         Console.WriteLine("Starting world generation.");
         
-        window.World = new WorldGeneration(new Random().Next()).GenerateWorld(window, new(128, 128));
+        window.World = new WorldGeneration(new Random().Next()).GenerateWorld(window, new(256, 256));
         window.World.StartUpdateThread();
         
         Console.WriteLine($"World generated after {timer.Elapsed.TotalSeconds:F3} seconds.");

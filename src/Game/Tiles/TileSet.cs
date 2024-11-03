@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 
 using SFML.Graphics;
+using SFML.System;
 
 
 namespace Stella.Game.Tiles;
@@ -36,12 +36,7 @@ public class TileSet : Image
 
     public void LoadFromTileIndex()
     {
-        List<Image[]> imageMatrix = [];
-        
         foreach (var (_, images) in TileIndex.LoadedTiles)
-            imageMatrix.Add(images);
-
-        foreach (Image[] images in imageMatrix)
             AddImageArray(images);
     }
 
@@ -80,5 +75,37 @@ public class TileSet : Image
 
         if (_minPixelY >= PixelHeight)
             IsFull = true;
+    }
+
+
+    public IntRect GetTilePixelBounds(string name)
+    {
+        int tileIndex = TileIndex.GetTileIndexByName(name);
+        return new(GetTilePixelPositionFromIndex(tileIndex), new((int)TileSize, (int)TileSize));
+    }
+    
+    public IntRect GetTilePixelBounds(int index)
+        => new(GetTilePixelPositionFromIndex(index), new((int)TileSize, (int)TileSize));
+
+
+    public Vector2i GetTilePixelPositionFromIndex(int index)
+    {
+        Vector2i position = new();
+        
+        for (int i = 0; i < index; i++)
+        {
+            position.X += (int)TileSize;
+                
+            if (position.X >= PixelWidth)
+            {
+                if (position.Y + TileSize >= PixelHeight)
+                    throw new ArgumentOutOfRangeException(nameof(index), "Index is too large.");
+                    
+                position.Y += (int)TileSize;
+                position.X = 0;
+            }
+        }
+
+        return position;
     }
 }

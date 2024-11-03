@@ -10,6 +10,7 @@ namespace Stella.Game.Tiles;
 public class TileDrawable : Sprite, ICloneable
 {
     public string Name { get; }
+    public int Index { get; }
     public bool IsVisible { get; private set; }
 
     public TileTextureAnimation TileTextureAnimation { get; }
@@ -23,6 +24,7 @@ public class TileDrawable : Sprite, ICloneable
     private TileDrawable(string name, TileTextureAnimation source) : base(source[0])
     {
         Name = name;
+        Index = TileIndex.GetTileIndexByName(Name);
         TileTextureAnimation = source;
     }
 

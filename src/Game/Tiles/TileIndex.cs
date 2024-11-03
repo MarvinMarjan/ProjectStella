@@ -12,6 +12,8 @@ namespace Stella.Game.Tiles;
 
 public static class TileIndex
 {
+    // TODO: have only one dictionary; encapsulate all those data in one struct
+    
     // all loaded tile textures
     public static readonly Dictionary<string, Image[]> LoadedTiles = new([
         new("grass", ImageArrayFromTilesDirectory("grass")),
@@ -48,6 +50,22 @@ public static class TileIndex
         new("sand", new(240, 250, 125)),
         new("snow", new(220, 255, 250)),
     ]);
+
+
+    public static int GetTileIndexByName(string name)
+    {
+        int index = 0;
+
+        foreach (var (tileName, _) in LoadedTiles)
+        {
+            if (tileName == name)
+                break;
+
+            index++;
+        }
+
+        return index;
+    }
 
 
     public static Image[] ImageArrayFromTilesDirectory(string dirName)
