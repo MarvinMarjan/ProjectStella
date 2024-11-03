@@ -16,20 +16,13 @@ public class TileWorld
 {
     public const int DefaultTileSize = 16;
  
-    public GameWindow GameWindow { get; private set; }
-    public TileSet TileSet { get; set; }
-    public Texture TileSetTexture { get; }
+    public GameWindow GameWindow { get; }
+    public TileMapRenderer Renderer { get; }
+    public RenderTexture RenderTexture { get; }
+    public RenderTexture MinimizedRenderTexture { get; }
+    public bool UpdateMinimizedRenderTextureRequested { get; set; }
     
-    // first render to a texture, then render to the window. By doing this,
-    // no line glitches occur when zooming the view.
-    private readonly RenderTexture _renderingTexture;
-    
-    private readonly VertexArray _drawingVertices;
-    private readonly VertexArray _minimizedDrawingVertices;
-    
-    public bool MinimizedVerticesUpdateRequested { get; set; }
-    
-    public float MinimizedDrawingZoomThreshold = 3000f;
+    public float MinimizedDrawingZoomThreshold { get; set; }
     public bool MinimizedDrawing { get; set; }
     
     public Tile[,] Tiles { get; }
@@ -41,25 +34,24 @@ public class TileWorld
     private readonly CancellationTokenSource _verticesUpdateThreadCancellationTokenSource;
 
     
-    public TileWorld(GameWindow window, Vector2u worldSize, int tileSize = DefaultTileSize)
+    public TileWorld(GameWindow window, Vector2u worldSize, uint tileSize = DefaultTileSize)
     {
         GameWindow = window;
         
-        TileSet = new(8, 8, DefaultTileSize);
-        TileSet.LoadFromTileIndex();
-        TileSet.SaveToFile(Path.Combine(Environment.CurrentDirectory, "tileset.png"));
-        TileSetTexture = new(TileSet);
-        TileSetTexture.Smooth = true;
-        
-        _renderingTexture = new(worldSize.X * DefaultTileSize, worldSize.Y * DefaultTileSize);
-
-        _drawingVertices = new(PrimitiveType.Quads, 4 * worldSize.X * worldSize.Y);
-        _minimizedDrawingVertices = new(PrimitiveType.Quads, 4 * worldSize.X * worldSize.Y);
-        
-        MinimizedDrawing = false;
+        TileSet tileSet = new(8, 8, DefaultTileSize);
+        tileSet.LoadFromTileIndex();
+        tileSet.SaveToFile(Path.Combine(Environment.CurrentDirectory, "tileset.png"));
         
         Tiles = new Tile[worldSize.Y, worldSize.X];
         Size = worldSize;
+        
+        Renderer = new(Tiles, tileSet, tileSize);
+        RenderTexture = new(worldSize.X * tileSize, worldSize.Y * tileSize);
+        MinimizedRenderTexture = new(worldSize.X * tileSize, worldSize.Y * tileSize);
+
+        Renderer.FirstVerticesUpdatedEvent += (_, _) => UpdateMinimizedRenderTextureRequested = true;
+
+        MinimizedDrawingZoomThreshold = 4000f;
         
         _tileUpdateThreadCancellationTokenSource = new();
         _verticesUpdateThreadCancellationTokenSource = new();
@@ -98,7 +90,7 @@ public class TileWorld
     private void VerticesUpdateThread(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
-            UpdateVertices(!MinimizedVerticesUpdateRequested);
+            Renderer.UpdateVertices();
     }
 
 
@@ -110,75 +102,29 @@ public class TileWorld
 
     public void Draw(GameWindow window)
     {
-        _renderingTexture.Clear();
+        if (UpdateMinimizedRenderTextureRequested)
+        {
+            UpdateMinimizedRenderTexture();
+            UpdateMinimizedRenderTextureRequested = false;
+        }
         
-        if (MinimizedDrawing)
-            _renderingTexture.Draw(_minimizedDrawingVertices);
-        else
-            _renderingTexture.Draw(_drawingVertices, new(TileSetTexture));
+        if (!MinimizedDrawing)
+            Renderer.Render(RenderTexture);
         
-        _renderingTexture.Display();
-        
-        window.Draw(new Sprite(_renderingTexture.Texture));
+        window.Draw(new Sprite(MinimizedDrawing ? MinimizedRenderTexture.Texture : RenderTexture.Texture));
     }
 
 
-    // TODO: use logs to see how the update is happening.
-    
-    public void UpdateVertices(bool ignoreNonVisible = true)
+    public void UpdateMinimizedRenderTexture()
     {
-        uint currentIndex = 0;
-
-        foreach (Tile tile in Tiles)
-        {
-            if (tile.Object is not null && (tile.Object.IsVisible || !ignoreNonVisible))
-            {
-                UpdateDrawingVerticesOfTile(tile.Object, currentIndex, MinimizedVerticesUpdateRequested);
-            }
-
-            // we are using Quads, so it's 4 vertices
-            currentIndex += 4;
-        }
-        
-        MinimizedVerticesUpdateRequested = false;
+        Renderer.NoTextures = true;
+        Renderer.UpdateVertices();
+        Renderer.Render(MinimizedRenderTexture);
+        Renderer.NoTextures = false;
     }
 
 
-    private void UpdateDrawingVerticesOfTile(TileDrawable tile, uint currentIndex, bool updateMinimized = false)
-    {
-        FloatRect bounds = tile.GetLocalBounds();
-        
-        float x = tile.Position.X;
-        float y = tile.Position.Y;
-        float sx = bounds.Width;
-        float sy = bounds.Height;
-        
-        if (updateMinimized)
-        {
-            Color color = TileIndex.LoadedTiles[tile.Name].Color;
-            
-            _minimizedDrawingVertices[currentIndex + 0] = new(new(x, y), color);
-            _minimizedDrawingVertices[currentIndex + 1] = new(new(x + sx, y), color);
-            _minimizedDrawingVertices[currentIndex + 2] = new(new(x + sx, y + sy), color);
-            _minimizedDrawingVertices[currentIndex + 3] = new(new(x, y + sy), color);
-        }
-        else
-        {
-            Vector2i texturePosition = TileSet.GetTilePixelPositionFromIndex(tile.Index);
-            
-            float tx = texturePosition.X;
-            float ty = texturePosition.Y;
-            float ts = TileSet.TileSize; // symmetric
-            
-            _drawingVertices[currentIndex + 0] = new(new(x, y), new Vector2f(tx, ty));
-            _drawingVertices[currentIndex + 1] = new(new(x + sx, y), new Vector2f(tx + ts, ty));
-            _drawingVertices[currentIndex + 2] = new(new(x + sx, y + sy), new Vector2f(tx + ts, ty + ts));
-            _drawingVertices[currentIndex + 3] = new(new(x, y + sy), new Vector2f(tx, ty + ts));
-        }
-    }
-
-
-    private void InitializeTileArray(Vector2u worldSize, int tileSize)
+    private void InitializeTileArray(Vector2u worldSize, uint tileSize)
     {
         Vector2f position = new(0, 0);
 

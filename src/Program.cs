@@ -23,15 +23,13 @@ class GameProgram
         
         Console.WriteLine("Starting world generation.");
 
-        Vector2u worldSize = new(1000, 1000);
+        Vector2u worldSize = new(512, 512);
         float[,] noise = new WorldGenerator(new Random().Next()).GenerateNoise(worldSize);
 
         window.World = new TileWorld(window, worldSize);
+        window.World.StartUpdateThreads();
         
         WorldGenerator.FillWorldFromNoiseAsync(window.World, noise).Wait();
-        window.World.MinimizedVerticesUpdateRequested = true;
-        
-        window.World.StartUpdateThreads();
         
         Console.WriteLine($"World generated after {timer.Elapsed.TotalSeconds:F3} seconds.");
         

@@ -7,7 +7,7 @@ namespace Stella.Game.Tiles;
 public class Tile
 {
     public Vector2f Position { get; }
-    public int Size { get; }
+    public uint Size { get; }
 
     private TileDrawable? _object;
     public TileDrawable? Object
@@ -26,7 +26,7 @@ public class Tile
     }
     
     
-    public Tile(Vector2f position, int size, TileDrawable? @object = null)
+    public Tile(Vector2f position, uint size, TileDrawable? @object = null)
     {
         Position = position;
         Size = size;

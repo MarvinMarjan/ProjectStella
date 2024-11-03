@@ -24,7 +24,7 @@ public class Camera
     public float ZoomOutFactor { get; private set; } = 1.3f; 
     public float ZoomInFactor { get; private set; } = 0.7f;
     
-    public float MaxZoomOut { get; private set; } = 6000f;
+    public float MaxZoomOut { get; private set; } = 9000f;
     public float MaxZoomIn { get; private set; } = 420f;
     
     public bool IsAtMaxZoom => Window.View.Size.X >= MaxZoomOut;
