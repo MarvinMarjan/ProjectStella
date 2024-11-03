@@ -17,7 +17,7 @@ public class TileDrawable : Sprite, ICloneable
     
 
     // TODO: cloning the texture may be important; test if it's behaving as a reference
-    public TileDrawable(string name) : this(name, new(TileIndex.LoadedTiles[name]))
+    public TileDrawable(string name) : this(name, TileIndex.LoadedTiles[name].TextureAnimation)
     { }
 
 

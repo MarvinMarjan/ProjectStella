@@ -10,46 +10,44 @@ using Stella.Game.World;
 namespace Stella.Game.Tiles;
 
 
+public readonly struct TileIndexData
+{
+    public Image[] Images { get; }
+    public TileTextureAnimation TextureAnimation { get; }
+    public NoiseRange NoiseRange { get; }
+    public Color Color { get; }
+    
+    
+    public TileIndexData(Image[] images, NoiseRange noiseRange, Color color)
+    {
+        Images = images;
+        TextureAnimation = new(Images);
+        NoiseRange = noiseRange;
+        Color = color;
+    }
+}
+
+
 public static class TileIndex
 {
     // TODO: have only one dictionary; encapsulate all those data in one struct
     
     // all loaded tile textures
-    public static readonly Dictionary<string, Image[]> LoadedTiles = new([
-        new("grass", ImageArrayFromTilesDirectory("grass")),
-        new("light_grass", ImageArrayFromTilesDirectory("light_grass")),
-        new("dirt", ImageArrayFromTilesDirectory("dirt")),
-        new("stone", ImageArrayFromTilesDirectory("stone")),
-        new("dark_stone", ImageArrayFromTilesDirectory("dark_stone")),
-        new("water", ImageArrayFromTilesDirectory("water")),
-        new("deep_water", ImageArrayFromTilesDirectory("deep_water")),
-        new("sand", ImageArrayFromTilesDirectory("sand")),
-        new("snow", ImageArrayFromTilesDirectory("snow"))
-    ]);
-    
-    public static readonly Dictionary<string, NoiseRange> TileNoiseRange = new([
-        new("deep_water", new(0f, 0.5f)),
-        new("water", new(0.5f, 0.6f)),
-        new("sand", new(0.6f, 0.7f)),
-        new("light_grass", new(0.7f, 1.0f)),
-        new("grass", new(1.0f, 1.3f)),
-        new("dirt", new(1.3f, 1.4f)),
-        new("stone", new(1.4f, 1.55f)),
-        new("dark_stone", new(1.55f, 1.7f)),
-        new("snow", new(1.7f, 2f)),
+    public static readonly Dictionary<string, TileIndexData> LoadedTiles = new([
+        NewTileIndexData("grass", new(1.0f, 1.3f), new(10, 135, 0)),
+        NewTileIndexData("light_grass", new(0.7f, 1.0f), new(10, 170, 0)),
+        NewTileIndexData("dirt", new(1.3f, 1.4f), new(95, 70, 30)),
+        NewTileIndexData("stone", new(1.4f, 1.55f), new(150, 150, 150)),
+        NewTileIndexData("dark_stone", new(1.55f, 1.7f), new(120, 120, 120)),
+        NewTileIndexData("water", new(0.5f, 0.6f), new(200, 255, 255)),
+        NewTileIndexData("deep_water", new(0f, 0.5f), new(130, 255, 255)),
+        NewTileIndexData("sand", new(0.6f, 0.7f), new(240, 250, 125)),
+        NewTileIndexData("snow", new(1.7f, 2f), new(220, 255, 250))
     ]);
 
-    public static readonly Dictionary<string, Color> TileColor = new([
-        new("grass", new(10, 135, 0)),
-        new("light_grass", new(10, 170, 0)),
-        new("dirt", new(95, 70, 30)),
-        new("stone", new(150, 150, 150)),
-        new("dark_stone", new(120, 120, 120)),
-        new("water", new(200, 255, 255)),
-        new("deep_water", new(130, 255, 255)),
-        new("sand", new(240, 250, 125)),
-        new("snow", new(220, 255, 250)),
-    ]);
+
+    private static KeyValuePair<string, TileIndexData> NewTileIndexData(string name, NoiseRange noiseRange, Color color)
+        => new(name, new(ImageArrayFromTilesDirectory(name), noiseRange, color));
 
 
     public static int GetTileIndexByName(string name)
@@ -85,8 +83,8 @@ public static class TileIndex
 
     public static TileDrawable? FromNoiseValue(float noiseValue)
     {
-        foreach (var (name, range) in TileNoiseRange)
-            if (range.IsBetween(noiseValue))
+        foreach (var (name, tile) in LoadedTiles)
+            if (tile.NoiseRange.IsBetween(noiseValue))
                 return new(name);
 
         return null;

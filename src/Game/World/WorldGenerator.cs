@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using SFML.System;
 
 using Stella.Game.Tiles;
@@ -6,7 +8,7 @@ using Stella.Game.Tiles;
 namespace Stella.Game.World;
 
 
-public class WorldGeneration(int seed)
+public class WorldGenerator(int seed)
 {
     public int Seed { get; } = seed;
 
@@ -33,32 +35,18 @@ public class WorldGeneration(int seed)
     }
 
     
-    public TileWorld GenerateWorld(GameWindow window, Vector2u worldSize)
-    {
-        float[,] noise = GenerateNoise(worldSize);
-
-        if (GlobalSettings.GeneratedPerlinSavePath is not null)
-            PerlinNoiseUtils.SaveNoiseToFile(noise, GlobalSettings.GeneratedPerlinSavePath);
-        
-        return WorldFromNoise(window, noise);
-    }
-
-    
     public float[,] GenerateNoise(Vector2u worldSize)
         => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
     
-    public static TileWorld WorldFromNoise(GameWindow window, float[,] noise)
-    {
-        TileWorld world = new(window, new(noise.GetLength(1), noise.GetLength(0)));
-
-        for (int row = 0; row < world.Size.Y; row++)
-            for (int col = 0; col < world.Size.X; col++)
-            {
-                float value = NoiseRange.ToValidNoiseValue(noise[row, col]);
-                world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
-            }
-        
-        return world;
-    }
+    public static async Task FillWorldFromNoiseAsync(TileWorld world, float[,] noise)
+        => await Task.Run(() =>
+        {
+            for (int row = 0; row < world.Size.Y; row++)
+                for (int col = 0; col < world.Size.X; col++)
+                {
+                    float value = NoiseRange.ToValidNoiseValue(noise[row, col]);
+                    world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
+                }
+        });
 }

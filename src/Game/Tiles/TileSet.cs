@@ -36,8 +36,8 @@ public class TileSet : Image
 
     public void LoadFromTileIndex()
     {
-        foreach (var (_, images) in TileIndex.LoadedTiles)
-            AddImageArray(images);
+        foreach (var (_, tile) in TileIndex.LoadedTiles)
+            AddImageArray(tile.Images);
     }
 
 
