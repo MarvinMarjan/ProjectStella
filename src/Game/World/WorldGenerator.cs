@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 using SFML.System;
@@ -38,15 +39,27 @@ public class WorldGenerator(int seed)
     public float[,] GenerateNoise(Vector2u worldSize)
         => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
-    
+
     public static async Task FillWorldFromNoiseAsync(TileWorld world, float[,] noise)
         => await Task.Run(() =>
         {
-            for (int row = 0; row < world.Size.Y; row++)
-                for (int col = 0; col < world.Size.X; col++)
+            Parallel.For(0, world.Size.Y, new() { MaxDegreeOfParallelism = 5}, row => {
+                for (uint col = 0; col < world.Size.X; col++)
                 {
                     float value = NoiseRange.ToValidNoiseValue(noise[row, col]);
                     world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
                 }
+            });
         });
+
+
+    public static TileWorld GenerateWorld(GameWindow window, Vector2u worldSize, int? seed)
+    {
+        float[,] noise = new WorldGenerator(seed ?? new Random().Next()).GenerateNoise(worldSize);
+
+        TileWorld world = new(window, worldSize);
+        FillWorldFromNoiseAsync(world, noise).Wait();
+
+        return world;
+    }
 }

@@ -9,14 +9,14 @@ namespace Stella.Game.Tiles;
 
 public class TileDrawable : Sprite, ICloneable
 {
+    public const int DefaultTilePixelSize = 16;
+    
     public string Name { get; }
     public int Index { get; }
-    public bool IsVisible { get; private set; }
 
     public TileTextureAnimation TileTextureAnimation { get; }
     
 
-    // TODO: cloning the texture may be important; test if it's behaving as a reference
     public TileDrawable(string name) : this(name, TileIndex.LoadedTiles[name].TextureAnimation)
     { }
 
@@ -31,14 +31,13 @@ public class TileDrawable : Sprite, ICloneable
 
     public void Update(GameWindow window)
     {
-        IsVisible = window.Camera.IsRectVisibleToCamera(GetGlobalBounds());
+        
     }
 
 
     public void Draw(GameWindow window)
     {
-        if (IsVisible)
-            window.Draw(this);
+        window.Draw(this);
     }
 
 

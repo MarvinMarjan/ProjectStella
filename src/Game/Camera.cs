@@ -24,14 +24,11 @@ public class Camera
     public float ZoomOutFactor { get; private set; } = 1.3f; 
     public float ZoomInFactor { get; private set; } = 0.7f;
     
-    public float MaxZoomOut { get; private set; } = 9000f;
+    public float MaxZoomOut { get; private set; } = 15000f;
     public float MaxZoomIn { get; private set; } = 420f;
     
     public bool IsAtMaxZoom => Window.View.Size.X >= MaxZoomOut;
     public bool IsAtMinZoom => Window.View.Size.Y <= MaxZoomIn;
-    
-    public static Vector2f DefaultVisibleAreaOffset => new(400f, 400f);
-    public Vector2f VisibleAreaOffset { get; private set; }
     
     public bool IsGrabbingView => Window.HasFocus() && Mouse.IsButtonPressed(Mouse.Button.Right);
     
@@ -41,7 +38,6 @@ public class Camera
         Window = window;
 
         DefaultViewSize = Window.View.Size;
-        VisibleAreaOffset = DefaultVisibleAreaOffset;
     }
     
 
@@ -55,8 +51,6 @@ public class Camera
             float zoom = MouseScrollDelta > 0 ? ZoomInFactor : ZoomOutFactor;
             Window.View.Zoom(zoom);
         }
-
-        VisibleAreaOffset = new(DefaultVisibleAreaOffset.X / ViewSizeDiff.X, DefaultVisibleAreaOffset.Y / ViewSizeDiff.Y);
         
         MouseScrollDelta = 0f;
         
@@ -66,13 +60,8 @@ public class Camera
 
     public bool IsRectVisibleToCamera(FloatRect rect)
     {
-        Vector2f windowPosition = Window.View.Center - Window.View.Size / 2;
-        windowPosition.X -= VisibleAreaOffset.X;
-        windowPosition.Y -= VisibleAreaOffset.Y;
-
-        Vector2f windowViewSize = Window.View.Size;
-        windowViewSize.X += VisibleAreaOffset.X * 2;
-        windowViewSize.Y += VisibleAreaOffset.Y * 2;
+        Vector2f windowPosition = Window.View.Center - Window.View.Size;
+        Vector2f windowViewSize = Window.View.Size * 2;
         
         return rect.Intersects(new(windowPosition, windowViewSize));
     }

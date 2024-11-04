@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using SFML.Graphics;
 using SFML.System;
@@ -9,6 +10,8 @@ namespace Stella.Game.Tiles;
 
 public class TileSet : Image
 {
+    public static TileSet Global { get; private set; }
+
     public uint Width { get; }
     public uint Height { get; }
     public uint PixelWidth => Width * TileSize;
@@ -21,6 +24,14 @@ public class TileSet : Image
     private uint _minPixelY;
     
     public bool IsFull { get; private set; }
+
+
+    static TileSet()
+    {
+        Global = new(8, 8, TileDrawable.DefaultTilePixelSize);
+        Global.LoadFromTileIndex();
+        Global.SaveToFile(Path.Combine(Environment.CurrentDirectory, "tileset.png"));
+    }
 
 
     public TileSet(uint width, uint height, uint tileSize) : base(width * tileSize, height * tileSize)

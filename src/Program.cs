@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using SFML.Graphics;
-using SFML.System;
+
 using Stella.Game;
-using Stella.Game.Tiles;
 using Stella.Game.World;
 
 
@@ -22,14 +20,11 @@ class GameProgram
         timer.Start();
         
         Console.WriteLine("Starting world generation.");
-
-        Vector2u worldSize = new(512, 512);
-        float[,] noise = new WorldGenerator(new Random().Next()).GenerateNoise(worldSize);
-
-        window.World = new TileWorld(window, worldSize);
-        window.World.StartUpdateThreads();
         
-        WorldGenerator.FillWorldFromNoiseAsync(window.World, noise).Wait();
+        window.World = WorldGenerator.GenerateWorld(window, new(2304, 2304), null);
+        window.World.StartUpdateThreads();
+
+        window.View.Center = window.World.Tiles[0, 0].Position;
         
         Console.WriteLine($"World generated after {timer.Elapsed.TotalSeconds:F3} seconds.");
         

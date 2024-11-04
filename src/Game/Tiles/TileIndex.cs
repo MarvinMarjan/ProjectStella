@@ -30,8 +30,6 @@ public readonly struct TileIndexData
 
 public static class TileIndex
 {
-    // TODO: have only one dictionary; encapsulate all those data in one struct
-    
     // all loaded tile textures
     public static readonly Dictionary<string, TileIndexData> LoadedTiles = new([
         NewTileIndexData("grass", new(1.0f, 1.3f), new(10, 135, 0)),

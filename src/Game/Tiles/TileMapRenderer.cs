@@ -9,39 +9,56 @@ namespace Stella.Game.Tiles;
 
 public class TileMapRenderer
 {
-    public Tile[,] Tiles { get; }
+    // TODO: test this with larger maps (tested, working); disable it and test if the rendering line glitch comes back again
+    private object _renderLock = new();
+    
+    
+    private Tile[,] _tiles;
+
+    public Tile[,] Tiles
+    {
+        get => _tiles;
+        set
+        {
+            _tiles = value;
+            TileVertices = VertexArrayFromTiles(value);
+        }
+    }
+    
     public TileSet TileSet { get; }
     private readonly Texture _tileSetTexture;
     
-    public VertexArray TileVertices { get; }
-    public bool _init;
+    public VertexArray TileVertices { get; private set; }
     public bool NoTextures { get; set; }
-
-    public EventHandler? FirstVerticesUpdatedEvent;
     
 
-    public TileMapRenderer(Tile[,] tiles, TileSet tileSet, uint tileSize)
+    public TileMapRenderer(Tile[,] tiles)
     {
-        Tiles = tiles;
-        TileSet = tileSet;
+        _tiles = tiles;
+        TileVertices = VertexArrayFromTiles(tiles);
+        
+        TileSet = TileSet.Global;
         _tileSetTexture = new(TileSet);
         _tileSetTexture.Smooth = true;
-        
-        TileVertices = new(PrimitiveType.Quads, (uint)(4 * tiles.GetLength(1) * tiles.GetLength(0)));
-        _init = true;
     }
 
 
     public void Render(RenderTexture texture)
     {
         texture.Clear();
-        
-        if (NoTextures)
-            texture.Draw(TileVertices);
-        else
-            texture.Draw(TileVertices, new(_tileSetTexture));
-        
+        AddRender(texture);
         texture.Display();
+    }
+
+    public void AddRender(RenderTexture texture)
+    {
+        lock (_renderLock)
+        {
+            if (NoTextures)
+                texture.Draw(TileVertices);
+            else
+                texture.Draw(TileVertices, new(_tileSetTexture));
+        }
     }
 
 
@@ -54,48 +71,53 @@ public class TileMapRenderer
             if (tile.Object is not null)
                 UpdateVerticesOfTile(tile.Object, currentIndex);
                                 
-            // we are using Quads, so it's 4 vertices
-            currentIndex += 4;
-        }
-
-        if (_init)
-        {
-            FirstVerticesUpdatedEvent?.Invoke(this, EventArgs.Empty);
-            _init = false;
+            // we are using triangles, so it's 6 vertices
+            currentIndex += 6;
         }
     }
 
 
     private void UpdateVerticesOfTile(TileDrawable tile, uint currentIndex)
     {
-        FloatRect bounds = tile.GetLocalBounds();
+        FloatRect bounds = tile.GetGlobalBounds();
         
         float x = tile.Position.X;
         float y = tile.Position.Y;
         float sx = bounds.Width;
         float sy = bounds.Height;
-        
-        if (NoTextures)
+
+        lock (_renderLock)
         {
-            Color color = TileIndex.LoadedTiles[tile.Name].Color;
+            if (NoTextures)
+            {
+                Color color = TileIndex.LoadedTiles[tile.Name].Color;
             
-            TileVertices[currentIndex + 0] = new(new(x, y), color);
-            TileVertices[currentIndex + 1] = new(new(x + sx, y), color);
-            TileVertices[currentIndex + 2] = new(new(x + sx, y + sy), color);
-            TileVertices[currentIndex + 3] = new(new(x, y + sy), color);
-        }
-        else
-        {
-            Vector2i texturePosition = TileSet.GetTilePixelPositionFromIndex(tile.Index);
+                TileVertices[currentIndex + 0] = new(new(x, y), color);
+                TileVertices[currentIndex + 1] = new(new(x + sx, y), color);
+                TileVertices[currentIndex + 2] = new(new(x, y + sy), color);
+                TileVertices[currentIndex + 3] = new(new(x, y + sy), color);
+                TileVertices[currentIndex + 4] = new(new(x + sx, y + sy), color);
+                TileVertices[currentIndex + 5] = new(new(x + sx, y), color);
+            }
+            else
+            {
+                Vector2i texturePosition = TileSet.GetTilePixelPositionFromIndex(tile.Index);
         
-            float tx = texturePosition.X;
-            float ty = texturePosition.Y;
-            float ts = TileSet.TileSize; // symmetric
+                float tx = texturePosition.X;
+                float ty = texturePosition.Y;
+                float ts = TileSet.TileSize; // symmetric
         
-            TileVertices[currentIndex + 0] = new(new(x, y), new Vector2f(tx, ty));
-            TileVertices[currentIndex + 1] = new(new(x + sx, y), new Vector2f(tx + ts, ty));
-            TileVertices[currentIndex + 2] = new(new(x + sx, y + sy), new Vector2f(tx + ts, ty + ts));
-            TileVertices[currentIndex + 3] = new(new(x, y + sy), new Vector2f(tx, ty + ts));
+                TileVertices[currentIndex + 0] = new(new(x, y), new Vector2f(tx, ty));
+                TileVertices[currentIndex + 1] = new(new(x + sx, y), new Vector2f(tx + ts, ty));
+                TileVertices[currentIndex + 2] = new(new(x, y + sy), new Vector2f(tx, ty + ts));
+                TileVertices[currentIndex + 3] = new(new(x, y + sy), new Vector2f(tx, ty + ts));
+                TileVertices[currentIndex + 4] = new(new(x + sx, y + sy), new Vector2f(tx + ts, ty + ts));
+                TileVertices[currentIndex + 5] = new(new(x + sx, y), new Vector2f(tx + ts, ty));
+            }
         }
     }
+    
+    
+    private static VertexArray VertexArrayFromTiles(Tile[,] tiles)
+        => new(PrimitiveType.Triangles, (uint)(6 * tiles.GetLength(1) * tiles.GetLength(0)));
 }
