@@ -9,9 +9,7 @@ namespace Stella.Game.Tiles;
 
 public class TileMapRenderer
 {
-    // TODO: test this with larger maps (tested, working); disable it and test if the rendering line glitch comes back again
     private object _renderLock = new();
-    
     
     private Tile[,] _tiles;
 
@@ -39,25 +37,18 @@ public class TileMapRenderer
         
         TileSet = TileSet.Global;
         _tileSetTexture = new(TileSet);
-        _tileSetTexture.Smooth = true;
+        //_tileSetTexture.Smooth = true;
     }
+    
 
-
-    public void Render(RenderTexture texture)
-    {
-        texture.Clear();
-        AddRender(texture);
-        texture.Display();
-    }
-
-    public void AddRender(RenderTexture texture)
+    public void Render(RenderTarget target)
     {
         lock (_renderLock)
         {
             if (NoTextures)
-                texture.Draw(TileVertices);
+                target.Draw(TileVertices);
             else
-                texture.Draw(TileVertices, new(_tileSetTexture));
+                target.Draw(TileVertices, new(_tileSetTexture));
         }
     }
 
@@ -85,7 +76,7 @@ public class TileMapRenderer
         float y = tile.Position.Y;
         float sx = bounds.Width;
         float sy = bounds.Height;
-
+        
         lock (_renderLock)
         {
             if (NoTextures)

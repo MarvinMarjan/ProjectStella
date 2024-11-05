@@ -7,7 +7,7 @@ namespace Stella.Game;
 
 public static class GlobalSettings
 {
-    public static uint AntialiasingLevel { get; set; } = 3;
+    public static uint AntialiasingLevel { get; set; } = 0;
     
     public static string? GeneratedPerlinSavePath => Path.Combine(Environment.CurrentDirectory, "test.png");
     

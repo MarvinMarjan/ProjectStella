@@ -14,15 +14,7 @@ namespace Stella.Game.World;
 public class TileWorld
 {
     public GameWindow GameWindow { get; }
-    public RenderTexture RenderTexture { get; }
 
-    private TileMapRenderer _minimizedRenderer;
-    public RenderTexture MinimizedRenderTexture { get; }
-    public bool UpdateMinimizedRenderTextureRequested { get; set; }
-    
-    public float MinimizedDrawingZoomThreshold { get; set; }
-    public bool MinimizedDrawing { get; set; }
-    
     public Tile[,] Tiles { get; }
     public Chunk[,] Chunks { get; }
     public Vector2u Size { get; }
@@ -32,33 +24,22 @@ public class TileWorld
     private readonly CancellationTokenSource _chunkUpdateThreadCancellationTokenSource;
     private readonly CancellationTokenSource _chunkVerticesUpdateThreadCancellationTokenSource;
 
+    public EventHandler<bool>? MinimizedDrawingChangedEvent;
+
     
     public TileWorld(GameWindow window, Vector2u worldSize)
     {
         if (worldSize.X != worldSize.Y || worldSize.X % Chunk.ChunkSize != 0)
             throw new ArgumentException($"Invalid world size; it must be symmetrical and divisible by {Chunk.ChunkSize}.");
-        
+
         GameWindow = window;
 
         Tiles = new Tile[worldSize.Y, worldSize.X];
         Chunks = new Chunk[worldSize.Y / Chunk.ChunkSize, worldSize.X / Chunk.ChunkSize];
         Size = worldSize;
 
-        _minimizedRenderer = new(Tiles);
-        _minimizedRenderer.NoTextures = true;
-        
         InitializeTileMatrix();
         InitializeChunks();
-
-        const uint tileSize = TileDrawable.DefaultTilePixelSize;
-        
-        // TODO: improve this
-        RenderTexture = new(1024 * tileSize, 1024 * tileSize);
-        MinimizedRenderTexture = new(1024 * tileSize, 1024 * tileSize);
-        
-        UpdateMinimizedRenderTextureRequested = true;
-        
-        MinimizedDrawingZoomThreshold = 5500f;
         
         _chunkUpdateThreadCancellationTokenSource = new();
         _chunkVerticesUpdateThreadCancellationTokenSource = new();
@@ -106,30 +87,14 @@ public class TileWorld
 
     public void Update(GameWindow window)
     {
-        MinimizedDrawing = window.View.Size.X >= MinimizedDrawingZoomThreshold;
+        
     }
 
 
     public void Draw(GameWindow window)
     {
-        if (UpdateMinimizedRenderTextureRequested)
-        {
-            _minimizedRenderer.UpdateVertices();
-            _minimizedRenderer.Render(MinimizedRenderTexture);
-            UpdateMinimizedRenderTextureRequested = false;
-        }
-        
-        if (!MinimizedDrawing)
-        {
-            RenderTexture.Clear();
-
-            foreach (Chunk chunk in Chunks)
-                chunk.Draw(RenderTexture);
-
-            RenderTexture.Display();
-        }
-        
-        window.Draw(new Sprite(MinimizedDrawing ? MinimizedRenderTexture.Texture : RenderTexture.Texture));
+        foreach (Chunk chunk in Chunks)
+            chunk.Draw(window);
     }
     
     

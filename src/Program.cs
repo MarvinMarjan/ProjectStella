@@ -8,6 +8,11 @@ using Stella.Game.World;
 namespace Stella;
 
 
+// TODO: someday, add a question in stackoverflow about the problem that happens when this game uses antialiasing:
+
+// The problem is not about using integers in view transformations and is not
+// about integers at all (Tested).
+
 class GameProgram
 {
     private static void Main(string[] args)
@@ -21,10 +26,10 @@ class GameProgram
         
         Console.WriteLine("Starting world generation.");
         
-        window.World = WorldGenerator.GenerateWorld(window, new(2304, 2304), null);
+        window.World = WorldGenerator.GenerateWorld(window, new(2048, 2048), null);
         window.World.StartUpdateThreads();
 
-        window.View.Center = window.World.Tiles[0, 0].Position;
+        window.View.Center = window.World.Tiles[window.World.Size.X / 2, window.World.Size.Y / 2].Position;
         
         Console.WriteLine($"World generated after {timer.Elapsed.TotalSeconds:F3} seconds.");
         

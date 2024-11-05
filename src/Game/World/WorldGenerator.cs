@@ -14,12 +14,12 @@ public class WorldGenerator(int seed)
     public int Seed { get; } = seed;
 
 
-    public FastNoiseLite GetDefaultNoise()
+    private FastNoiseLite GetDefaultNoise()
     {
         FastNoiseLite noise = new(Seed);
         
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        noise.SetFrequency(0.005f);
+        noise.SetFrequency(0.0035f);
         noise.SetFractalType(FastNoiseLite.FractalType.FBm);
         noise.SetFractalOctaves(3);
         noise.SetFractalLacunarity(2f);
@@ -35,9 +35,18 @@ public class WorldGenerator(int seed)
         return noise;
     }
 
+    private FastNoiseLite GetTerrainHeightMultiplierNoise()
+    {
+        FastNoiseLite noise = GetDefaultNoise();
+        noise.SetFrequency(0.0007f);
+        noise.SetFractalOctaves(1);
+
+        return noise;
+    }
+
     
-    public float[,] GenerateNoise(Vector2u worldSize)
-        => GetDefaultNoise().FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
+    private float[,] GenerateNoise(Vector2u worldSize, FastNoiseLite noise)
+        => noise.FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
 
     public static async Task FillWorldFromNoiseAsync(TileWorld world, float[,] noise)
@@ -46,7 +55,7 @@ public class WorldGenerator(int seed)
             Parallel.For(0, world.Size.Y, new() { MaxDegreeOfParallelism = 5}, row => {
                 for (uint col = 0; col < world.Size.X; col++)
                 {
-                    float value = NoiseRange.ToValidNoiseValue(noise[row, col]);
+                    float value = NoiseRange.ToUnsignedNoiseValue(noise[row, col]);
                     world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
                 }
             });
@@ -55,10 +64,24 @@ public class WorldGenerator(int seed)
 
     public static TileWorld GenerateWorld(GameWindow window, Vector2u worldSize, int? seed)
     {
-        float[,] noise = new WorldGenerator(seed ?? new Random().Next()).GenerateNoise(worldSize);
+        WorldGenerator generator = new(seed ?? new Random().Next());
+        
+        float[,] baseNoise = generator.GenerateNoise(worldSize, generator.GetDefaultNoise());
+        float[,] heightFactorNoise = generator.GenerateNoise(worldSize, generator.GetTerrainHeightMultiplierNoise());
 
+        float[,] finalNoise = new float[worldSize.Y, worldSize.X];
+        
+        PerlinNoiseUtils.SaveNoiseToFile(baseNoise, "baseNoise.png");
+        PerlinNoiseUtils.SaveNoiseToFile(heightFactorNoise, "heightNoise.png");
+        
+        for (int row = 0; row < worldSize.Y; row++)
+            for (int col = 0; col < worldSize.X; col++)
+                finalNoise[row, col] = baseNoise[row, col] + heightFactorNoise[row, col];
+        
+        PerlinNoiseUtils.SaveNoiseToFile(finalNoise, "finalNoise.png");
+        
         TileWorld world = new(window, worldSize);
-        FillWorldFromNoiseAsync(world, noise).Wait();
+        FillWorldFromNoiseAsync(world, finalNoise).Wait();
 
         return world;
     }

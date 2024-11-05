@@ -12,7 +12,7 @@ public readonly record struct NoiseRange(float Start, float End)
         => value >= Start && value <= End;
 
     // forces a noise value to be between 0f and 2f. 
-    public static float ToValidNoiseValue(float value)
+    public static float ToUnsignedNoiseValue(float value)
         => Math.Clamp(value, -1f, 1f) + 1f;
 }
 
@@ -41,7 +41,7 @@ public static class PerlinNoiseUtils
         for (uint x = 0; x < width; x++)
             for (uint y = 0; y < height; y++)
             {
-                byte colorValue = (byte)(NoiseRange.ToValidNoiseValue(noise[y, x]) * 127.5f);
+                byte colorValue = (byte)(NoiseRange.ToUnsignedNoiseValue(noise[y, x]) * 127.5f);
                 image.SetPixel(x, y, new Color(colorValue, colorValue, colorValue));
             }
 

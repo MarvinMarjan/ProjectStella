@@ -47,15 +47,15 @@ public class Chunk
     }
 
 
-    public void Draw(RenderTexture renderTexture, bool renderOutline = false)
+    public void Draw(RenderTarget target, bool renderOutline = false)
     {
         if (!IsVisibleToWindow())
             return;
         
-        Renderer.AddRender(renderTexture);
+        Renderer.Render(target);
         
         if (renderOutline)
-            renderTexture.Draw(new RectangleShape(Size)
+            target.Draw(new RectangleShape(Size)
             {
                 Position = Position,
                 FillColor = Color.Transparent,

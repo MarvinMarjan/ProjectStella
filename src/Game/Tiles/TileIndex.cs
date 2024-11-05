@@ -32,13 +32,13 @@ public static class TileIndex
 {
     // all loaded tile textures
     public static readonly Dictionary<string, TileIndexData> LoadedTiles = new([
-        NewTileIndexData("grass", new(1.0f, 1.3f), new(10, 135, 0)),
-        NewTileIndexData("light_grass", new(0.7f, 1.0f), new(10, 170, 0)),
+        NewTileIndexData("grass", new(0.7f, 1.0f), new(10, 170, 0)),
+        NewTileIndexData("dark_grass", new(1.0f, 1.3f), new(10, 135, 0)),
         NewTileIndexData("dirt", new(1.3f, 1.4f), new(95, 70, 30)),
         NewTileIndexData("stone", new(1.4f, 1.55f), new(150, 150, 150)),
         NewTileIndexData("dark_stone", new(1.55f, 1.7f), new(120, 120, 120)),
-        NewTileIndexData("water", new(0.5f, 0.6f), new(200, 255, 255)),
-        NewTileIndexData("deep_water", new(0f, 0.5f), new(130, 255, 255)),
+        NewTileIndexData("water", new(0.5f, 0.6f), new(0, 203, 255)),
+        NewTileIndexData("deep_water", new(0f, 0.5f), new(0, 152, 255)),
         NewTileIndexData("sand", new(0.6f, 0.7f), new(240, 250, 125)),
         NewTileIndexData("snow", new(1.7f, 2f), new(220, 255, 250))
     ]);

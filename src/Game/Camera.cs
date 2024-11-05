@@ -1,3 +1,5 @@
+using System;
+
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -19,13 +21,12 @@ public class Camera
     public float MouseScrollDelta { get; set; }
 
     public Vector2f DefaultViewSize { get; }
-    public Vector2f ViewSizeDiff => new(DefaultViewSize.X / Window.View.Size.X, DefaultViewSize.Y / Window.View.Size.Y);
     
     public float ZoomOutFactor { get; private set; } = 1.3f; 
     public float ZoomInFactor { get; private set; } = 0.7f;
     
-    public float MaxZoomOut { get; private set; } = 15000f;
-    public float MaxZoomIn { get; private set; } = 420f;
+    public float MaxZoomOut { get; private set; } = 7000f;
+    public float MaxZoomIn { get; private set; } = 200f;
     
     public bool IsAtMaxZoom => Window.View.Size.X >= MaxZoomOut;
     public bool IsAtMinZoom => Window.View.Size.Y <= MaxZoomIn;
@@ -36,7 +37,7 @@ public class Camera
     public Camera(GameWindow window)
     {
         Window = window;
-
+        
         DefaultViewSize = Window.View.Size;
     }
     
