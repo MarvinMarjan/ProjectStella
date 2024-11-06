@@ -14,13 +14,16 @@ public class TextElement : Element
     public static Font DefaultTextFont = new(Path.Combine(GlobalSettings.FontsDirectory, "itim.ttf"));
     
     public Text Text { get; protected set; }
+    
+    public override Transformable Transformable => Text;
 
 
     public TextElement(Element? parent, Vector2f position, uint size, string text, Font? font = null) : base(parent)
     {
+        Position = position;
+        
         Text = new(text, font ?? DefaultTextFont)
         {
-            Position = position,
             CharacterSize = size
         };
     }
@@ -32,4 +35,9 @@ public class TextElement : Element
         
         base.Draw(target);
     }
+
+    // TODO: use GetGlobalBounds for everything
+
+    public override FloatRect GetBounds()
+        => Text.GetGlobalBounds();
 }

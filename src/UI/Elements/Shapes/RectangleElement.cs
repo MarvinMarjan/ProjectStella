@@ -21,4 +21,12 @@ public class RectangleElement : ShapeElement
         Position = position;
         Size = size;
     }
+
+
+    protected override void UpdateSfmlProperties()
+    {
+        base.UpdateSfmlProperties();
+        
+        SfmlShape.Size = Size;
+    }
 }

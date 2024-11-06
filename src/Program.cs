@@ -14,7 +14,7 @@ class GameProgram
     private static void Main(string[] args)
     {
         MainWindow window = new();
-        window.CurrentArea = new MainGame(window);
+        window.CurrentArea = new MainMenu(window);
 
         while (window.IsOpen)
         {
