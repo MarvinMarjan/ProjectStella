@@ -21,8 +21,4 @@
       <PackageReference Include="SharpNoise" Version="0.12.1.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="resources\images\tiles\stone\" />
-    </ItemGroup>
-
 </Project>

@@ -1,8 +1,8 @@
-using System;
-
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+
+using Stella.Areas;
 
 
 namespace Stella.Game;
@@ -10,7 +10,7 @@ namespace Stella.Game;
 
 public class Camera
 {
-    public GameWindow Window { get; private set; }
+    public MainWindow Window { get; private set; }
     
     // how much the mouse position changed since the last frame update
     public Vector2f WorldMousePositionDelta => _oldWorldMousePosition - WorldMousePosition;
@@ -34,7 +34,7 @@ public class Camera
     public bool IsGrabbingView => Window.HasFocus() && Mouse.IsButtonPressed(Mouse.Button.Right);
     
     
-    public Camera(GameWindow window)
+    public Camera(MainWindow window)
     {
         Window = window;
         

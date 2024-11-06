@@ -1,17 +1,18 @@
 using SFML.Graphics;
 using SFML.System;
 
+using Stella.Areas;
 using Stella.Game.Tiles;
 
 
 namespace Stella.Game.World;
 
 
-public class Chunk
+public class Chunk : IDrawable, IUpdateable
 {
     public const uint ChunkSize = 64;
     
-    public GameWindow GameWindow { get;  }
+    public MainGame Game { get;  }
     
     public Tile[,] Tiles { get; }
     public TileMapRenderer Renderer { get; }
@@ -20,9 +21,9 @@ public class Chunk
     public Vector2f Size => new(ChunkSize * TileDrawable.DefaultTilePixelSize, ChunkSize * TileDrawable.DefaultTilePixelSize);
 
 
-    public Chunk(GameWindow gameWindow)
+    public Chunk(MainGame game)
     {
-        GameWindow = gameWindow;
+        Game = game;
         
         Tiles = new Tile[ChunkSize, ChunkSize];
         Renderer = new(Tiles);
@@ -34,7 +35,7 @@ public class Chunk
     {
         for (int row = 0; row < ChunkSize; row++)
             for (int col = 0; col < ChunkSize; col++)
-                Tiles[row, col].Object?.Update(GameWindow);
+                Tiles[row, col].Object?.Update();
     }
 
 
@@ -47,7 +48,7 @@ public class Chunk
     }
 
 
-    public void Draw(RenderTarget target, bool renderOutline = false)
+    public void Draw(RenderTarget target, bool renderOutline)
     {
         if (!IsVisibleToWindow())
             return;
@@ -60,11 +61,14 @@ public class Chunk
                 Position = Position,
                 FillColor = Color.Transparent,
                 OutlineColor = Color.Red,
-                OutlineThickness = 2f * (GameWindow.View.Size.X / GameWindow.Camera.DefaultViewSize.X)
+                OutlineThickness = 2f * (Game.View.Size.X / Game.Camera.DefaultViewSize.X)
             });
     }
 
+    public void Draw(RenderTarget target)
+        => Draw(target, false);
+
 
     public bool IsVisibleToWindow()
-        => GameWindow.Camera.IsRectVisibleToCamera(new(Position, Size));
+        => Game.Camera.IsRectVisibleToCamera(new(Position, Size));
 }

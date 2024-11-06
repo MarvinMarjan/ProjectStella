@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using SFML.System;
 
+using Stella.Areas;
 using Stella.Game.Tiles;
 
 
@@ -62,7 +63,7 @@ public class WorldGenerator(int seed)
         });
 
 
-    public static TileWorld GenerateWorld(GameWindow window, Vector2u worldSize, int? seed)
+    public static TileWorld GenerateWorld(MainGame game, Vector2u worldSize, int? seed)
     {
         WorldGenerator generator = new(seed ?? new Random().Next());
         
@@ -80,7 +81,7 @@ public class WorldGenerator(int seed)
         
         PerlinNoiseUtils.SaveNoiseToFile(finalNoise, "finalNoise.png");
         
-        TileWorld world = new(window, worldSize);
+        TileWorld world = new(game, worldSize);
         FillWorldFromNoiseAsync(world, finalNoise).Wait();
 
         return world;

@@ -1,0 +1,24 @@
+using SFML.System;
+using SFML.Graphics;
+
+
+namespace Stella.UI.Elements.Shapes;
+
+
+public class RectangleElement : ShapeElement
+{
+    public new RectangleShape SfmlShape => (base.SfmlShape as RectangleShape)!;
+
+    public Vector2f Size
+    {
+        get => SfmlShape.Size;
+        set => SfmlShape.Size = value;
+    }
+    
+
+    public RectangleElement(Element? parent, Vector2f position, Vector2f size) : base(parent, new RectangleShape(size))
+    {
+        Position = position;
+        Size = size;
+    }
+}

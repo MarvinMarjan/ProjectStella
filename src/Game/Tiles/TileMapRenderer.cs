@@ -37,7 +37,6 @@ public class TileMapRenderer
         
         TileSet = TileSet.Global;
         _tileSetTexture = new(TileSet);
-        //_tileSetTexture.Smooth = true;
     }
     
 

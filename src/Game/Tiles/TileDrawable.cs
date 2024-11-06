@@ -7,7 +7,7 @@ using SFML.Graphics;
 namespace Stella.Game.Tiles;
 
 
-public class TileDrawable : Sprite, ICloneable
+public class TileDrawable : Sprite, IDrawable, IUpdateable, ICloneable
 {
     public const int DefaultTilePixelSize = 16;
     
@@ -29,15 +29,15 @@ public class TileDrawable : Sprite, ICloneable
     }
 
 
-    public void Update(GameWindow window)
+    public void Update()
     {
         
     }
 
 
-    public void Draw(GameWindow window)
+    public void Draw(RenderTarget target)
     {
-        window.Draw(this);
+        target.Draw(this);
     }
 
 
