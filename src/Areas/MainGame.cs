@@ -21,7 +21,7 @@ public class MainGame : Area
 
         Camera = new(Window);
         
-        World = WorldGenerator.GenerateWorld(this, new(1024, 1024), null);
+        World = WorldGenerator.GenerateWorld(View, new(1024, 1024), null);
         World.StartUpdateThreads();
         
         Window.Closed += (_, _) => World.EndUpdateThreads();

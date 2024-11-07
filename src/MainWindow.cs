@@ -11,6 +11,11 @@ namespace Stella;
 
 public class MainWindow : RenderWindow
 {
+    public static MainWindow? Current { get; private set; }
+    
+    public Vector2i MousePosition => Mouse.GetPosition(this);
+    public Vector2f WorldMousePosition => MapPixelToCoords(MousePosition);
+    
     public Area? CurrentArea { get; set; }
     
     public View View { get; set; }
@@ -21,6 +26,8 @@ public class MainWindow : RenderWindow
         AntialiasingLevel = GlobalSettings.AntialiasingLevel
     })
     {
+        Current = this;
+        
         View = GetView();
      
         Closed += (_, _) => Close();

@@ -1,7 +1,6 @@
 using SFML.Graphics;
 using SFML.System;
 
-using Stella.Areas;
 using Stella.Game.Tiles;
 
 
@@ -12,7 +11,7 @@ public class Chunk : IDrawable, IUpdateable
 {
     public const uint ChunkSize = 64;
     
-    public MainGame Game { get;  }
+    public View View { get; }
     
     public Tile[,] Tiles { get; }
     public TileMapRenderer Renderer { get; }
@@ -21,9 +20,9 @@ public class Chunk : IDrawable, IUpdateable
     public Vector2f Size => new(ChunkSize * TileDrawable.DefaultTilePixelSize, ChunkSize * TileDrawable.DefaultTilePixelSize);
 
 
-    public Chunk(MainGame game)
+    public Chunk(View view)
     {
-        Game = game;
+        View = view;
         
         Tiles = new Tile[ChunkSize, ChunkSize];
         Renderer = new(Tiles);
@@ -48,27 +47,25 @@ public class Chunk : IDrawable, IUpdateable
     }
 
 
-    public void Draw(RenderTarget target, bool renderOutline)
+    public void Draw(RenderTarget target)
     {
         if (!IsVisibleToWindow())
             return;
         
         Renderer.Render(target);
         
-        if (renderOutline)
-            target.Draw(new RectangleShape(Size)
-            {
-                Position = Position,
-                FillColor = Color.Transparent,
-                OutlineColor = Color.Red,
-                OutlineThickness = 2f * (Game.View.Size.X / Game.Camera.DefaultViewSize.X)
-            });
+        // TODO: move this to other place:
+        // if (renderOutline)
+        //     target.Draw(new RectangleShape(Size)
+        //     {
+        //         Position = Position,
+        //         FillColor = Color.Transparent,
+        //         OutlineColor = Color.Red,
+        //         OutlineThickness = 2f * (Camera.View.Size.X / Camera.DefaultViewSize.X)
+        //     });
     }
-
-    public void Draw(RenderTarget target)
-        => Draw(target, false);
 
 
     public bool IsVisibleToWindow()
-        => Game.Camera.IsRectVisibleToCamera(new(Position, Size));
+        => View.IsRectVisibleToView(new(Position, Size));
 }

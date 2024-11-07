@@ -60,10 +60,5 @@ public class Camera
 
 
     public bool IsRectVisibleToCamera(FloatRect rect)
-    {
-        Vector2f windowPosition = Window.View.Center - Window.View.Size;
-        Vector2f windowViewSize = Window.View.Size * 2;
-        
-        return rect.Intersects(new(windowPosition, windowViewSize));
-    }
+        => Window.View.IsRectVisibleToView(rect);
 }

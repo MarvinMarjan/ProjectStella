@@ -1,4 +1,5 @@
 using System;
+
 using SFML.Graphics;
 using SFML.System;
 
@@ -23,6 +24,12 @@ public enum AlignmentType
     VerticalCenter = 1 << 5,
     
     Center = HorizontalCenter | VerticalCenter
+}
+
+
+public interface IAlignmentable
+{
+    Vector2f GetAlignmentPosition(AlignmentType alignment);
 }
 
 

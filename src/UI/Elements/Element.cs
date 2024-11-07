@@ -2,12 +2,13 @@ using System.Collections.Generic;
 
 using SFML.System;
 using SFML.Graphics;
+using Stella.Game;
 
 
 namespace Stella.UI.Elements;
 
 
-public abstract class Element : IUpdateable, IDrawable
+public abstract class Element : IUpdateable, IDrawable, IAlignmentable
 {
     public Element? Parent { get; set; }
     public List<Element> Children { get; }
@@ -26,11 +27,17 @@ public abstract class Element : IUpdateable, IDrawable
                 Position = value;
         }
     }
+    
+    public Vector2f Origin { get; set; }
 
     public float Rotation { get; set; }
     
-    public AlignmentType? Alignment { get; set; } 
-    
+    public AlignmentType? Alignment { get; set; }
+    public Vector2f AlignmentMargin { get; set; }
+
+    public bool DrawElementBoundaries { get; set; }
+
+
     protected Element(Element? parent)
     {
         Parent = parent;
@@ -42,8 +49,8 @@ public abstract class Element : IUpdateable, IDrawable
 
     public virtual void Update()
     {
-        if (Parent is not null && Alignment is not null)
-            AbsolutePosition = AlignmentCalculator.GetAlignedPositionOfChild(GetBounds(), Parent.GetBounds(), Alignment.Value);
+        if (Alignment is not null)
+            AbsolutePosition = GetAlignmentPosition(Alignment.Value) + AlignmentMargin;
      
         UpdateSfmlProperties();
         
@@ -54,6 +61,18 @@ public abstract class Element : IUpdateable, IDrawable
     
     public virtual void Draw(RenderTarget target)
     {
+        if (DrawElementBoundaries)
+        {
+            FloatRect bounds = GetBounds();
+            target.Draw(new RectangleShape(bounds.Size)
+            {
+                Position = bounds.Position,
+                FillColor = Color.Transparent,
+                OutlineColor = Color.Red,
+                OutlineThickness = 1f
+            });
+        }
+        
         foreach (Element child in Children)
             child.Draw(target);
     }
@@ -62,9 +81,17 @@ public abstract class Element : IUpdateable, IDrawable
     public abstract FloatRect GetBounds();
 
 
+    public virtual Vector2f GetAlignmentPosition(AlignmentType alignment)
+    {
+        FloatRect defaultBounds = MainWindow.Current!.View.ViewToRect();
+        return AlignmentCalculator.GetAlignedPositionOfChild(GetBounds(), Parent?.GetBounds() ?? defaultBounds, alignment);
+    }
+
+
     protected virtual void UpdateSfmlProperties()
     {
         Transformable.Position = AbsolutePosition;
+        Transformable.Origin = Origin;
         Transformable.Rotation = Rotation;
     }
 }

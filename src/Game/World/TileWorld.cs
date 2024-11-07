@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
-using Stella.Areas;
+
 using Stella.Game.Tiles;
 
 
@@ -13,7 +13,7 @@ namespace Stella.Game.World;
 
 public class TileWorld
 {
-    public MainGame Game { get; }
+    public View View { get; }
 
     public Tile[,] Tiles { get; }
     public Chunk[,] Chunks { get; }
@@ -27,12 +27,12 @@ public class TileWorld
     public EventHandler<bool>? MinimizedDrawingChangedEvent;
 
     
-    public TileWorld(MainGame game, Vector2u worldSize)
+    public TileWorld(View view, Vector2u worldSize)
     {
         if (worldSize.X != worldSize.Y || worldSize.X % Chunk.ChunkSize != 0)
             throw new ArgumentException($"Invalid world size; it must be symmetrical and divisible by {Chunk.ChunkSize}.");
 
-        Game = game;
+        View = view;
 
         Tiles = new Tile[worldSize.Y, worldSize.X];
         Chunks = new Chunk[worldSize.Y / Chunk.ChunkSize, worldSize.X / Chunk.ChunkSize];
@@ -122,7 +122,7 @@ public class TileWorld
     {
         for (uint y = 0; y < Chunks.GetLength(0); y++)
             for (uint x = 0; x < Chunks.GetLength(1); x++)
-                Chunks[y, x] = new(Game);
+                Chunks[y, x] = new(View);
                 
         for (uint row = 0; row < Tiles.GetLength(0); row++)
             for (uint col = 0; col < Tiles.GetLength(1); col++)
