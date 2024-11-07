@@ -31,10 +31,9 @@ public class TextElement : Element
 
     public override void Update()
     {
-        base.Update();
-        
-        
         UpdateSfmlProperties();
+        
+        base.Update();
     }
     
 

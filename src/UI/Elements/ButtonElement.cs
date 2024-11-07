@@ -43,8 +43,6 @@ public class ButtonElement : RectangleElement, IClickable
 
     public override void Update()
     {
-        base.Update();
-
         IsMouseHover = IsPointOver(MainWindow.Current!.WorldMousePosition);
         IsMouseDown = IsMouseHover && Mouse.IsButtonPressed(Mouse.Button.Left);
     
@@ -62,6 +60,8 @@ public class ButtonElement : RectangleElement, IClickable
             
         WasMouseDown = IsMouseDown;
         WasMouseHover = IsMouseHover;
+        
+        base.Update();
     }
     
     

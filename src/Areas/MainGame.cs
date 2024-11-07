@@ -1,7 +1,14 @@
+using System;
+using System.Threading;
+
 using SFML.Graphics;
+using SFML.System;
 
 using Stella.Game;
+using Stella.Game.Tiles;
 using Stella.Game.World;
+using Stella.UI;
+using Stella.UI.Elements;
 
 
 namespace Stella.Areas;
@@ -9,37 +16,91 @@ namespace Stella.Areas;
 
 public class MainGame : Area
 {
-    public TileWorld? World { get; set; } 
-    public Camera Camera { get; }
+    public ProgressBarPopup WorldGenerationProgressPopup { get; }
+    public TextElement WorldGenerationStage { get; }
+    public bool _wasWorldGenerated, _worldGenerated;
     
-    public View View { get; set; }
-
+    public TileWorld World { get; } 
+    public Camera? Camera { get; private set; }
+    
+    public event EventHandler? WorldGenerated;
+    
     
     public MainGame(MainWindow window) : base(window)
     {
-        View = Window.GetView();
+        WorldGenerationProgressPopup = new("World Generation Progress");
+        WorldGenerationProgressPopup.Show();
 
+        WorldGenerationStage = new(WorldGenerationProgressPopup, new(), 30, "Starting")
+        {
+            Alignment = AlignmentType.Center
+        };
+        
+        _wasWorldGenerated = _worldGenerated = false;
+        
+        // TODO: improve this
+        Vector2u worldSize = new(1024, 1024);
+        World = new(Window.View, worldSize);
+
+        float[,] noise = WorldGenerator.GenerateWorldNoise(worldSize, null);
+        
+        new Thread(() => WorldGenerator.FillWorldFromNoiseAsync(World, noise).Wait()).Start();
+    }
+
+
+    private void OnWorldGenerated()
+    {
         Camera = new(Window);
         
-        World = WorldGenerator.GenerateWorld(View, new(1024, 1024), null);
         World.StartUpdateThreads();
         
         Window.Closed += (_, _) => World.EndUpdateThreads();
         Window.MouseWheelScrolled += (_, args) => Camera.MouseScrollDelta = args.Delta;
         
-        window.View.Center = World.Tiles[World.Size.X / 2, World.Size.Y / 2].Position;
+        Window.View.Center = World.Tiles[World.Size.X / 2, World.Size.Y / 2].Position;
+        
+        WorldGenerated?.Invoke(this, EventArgs.Empty);
     }
 
     
     public sealed override void Update()
     {
-        Camera.Update();
-        World?.Update();
+        Camera?.Update();
+
+        WorldGenerationProgressPopup.ProgressBar.Progress = CalculateWorldGenerationProgress(World);
+        
+        _worldGenerated = WorldGenerationProgressPopup.ProgressBar.IsAtMax;
+        
+        if (!_wasWorldGenerated && _worldGenerated)
+            OnWorldGenerated();
+        
+        if (_worldGenerated)
+            World.Update();
+
+        WorldGenerationProgressPopup.Update();
+        
+        _wasWorldGenerated = _worldGenerated;
     }
 
 
     public sealed override void Draw(RenderTarget target)
     {
-        World?.Draw(Window);
+        if (_worldGenerated)
+            World.Draw(Window);
+        
+        WorldGenerationProgressPopup.Draw(target);
+    }
+    
+    
+    private float CalculateWorldGenerationProgress(TileWorld world)
+    {
+        uint worldSize = world.Size.X * world.Size.Y;
+        uint counter = 0;
+        
+        foreach (Tile tile in world.Tiles)
+            if (tile.Object is not null)
+                counter++;
+        
+        return counter / (float)worldSize;
     }
 }

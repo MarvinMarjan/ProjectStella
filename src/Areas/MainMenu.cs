@@ -16,7 +16,6 @@ public class MainMenu : Area
     public RectangleElement MenuBackground { get; }
     public ButtonElement PlayButton { get; }
     
-    
     public MainMenu(MainWindow window) : base(window)
     {
         BackgroundWorld = WorldGenerator.GenerateWorld(Window.View, new(128, 128), null);
@@ -39,6 +38,8 @@ public class MainMenu : Area
             Alignment = AlignmentType.HorizontalCenter | AlignmentType.Top,
             AlignmentMargin = new(0f, 20f)
         };
+
+        PlayButton.MouseUpEvent += (_, _) => Window.CurrentArea = new MainGame(Window);
     }
     
 

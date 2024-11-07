@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 using SFML.System;
 using SFML.Graphics;
+
 using Stella.Game;
 
 
@@ -15,14 +16,16 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
     
     public abstract Transformable Transformable { get; }
     
+    public bool Visible { get; set; }
+    
     public Vector2f Position { get; set; }
     public Vector2f AbsolutePosition
     {
-        get => Parent is not null ? Position + Parent.Position : Position;
+        get => Parent is not null ? Position + Parent.AbsolutePosition : Position;
         set
         {
             if (Parent is not null)
-                Position = value - Parent.Position;
+                Position = value - Parent.AbsolutePosition;
             else
                 Position = value;
         }
@@ -42,6 +45,8 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
     {
         Parent = parent;
         Children = [];
+     
+        Visible = true;
         
         Parent?.Children.Add(this);
     }
@@ -49,6 +54,9 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
 
     public virtual void Update()
     {
+        if (!Visible)
+            return;
+        
         if (Alignment is not null)
             AbsolutePosition = GetAlignmentPosition(Alignment.Value) + AlignmentMargin;
      
@@ -61,6 +69,9 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
     
     public virtual void Draw(RenderTarget target)
     {
+        if (!Visible)
+            return;
+        
         if (DrawElementBoundaries)
         {
             FloatRect bounds = GetBounds();
@@ -94,4 +105,11 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
         Transformable.Origin = Origin;
         Transformable.Rotation = Rotation;
     }
+    
+    
+    public void Show()
+        => Visible = true;
+    
+    public void Hide()
+        => Visible = false;
 }

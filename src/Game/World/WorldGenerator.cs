@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
 
-using Stella.Areas;
 using Stella.Game.Tiles;
 
 
@@ -64,26 +63,28 @@ public class WorldGenerator(int seed)
         });
 
 
-    public static TileWorld GenerateWorld(View view, Vector2u worldSize, int? seed)
+    public static float[,] GenerateWorldNoise(Vector2u worldSize, int? seed)
     {
         WorldGenerator generator = new(seed ?? new Random().Next());
         
         float[,] baseNoise = generator.GenerateNoise(worldSize, generator.GetDefaultNoise());
         float[,] heightFactorNoise = generator.GenerateNoise(worldSize, generator.GetTerrainHeightMultiplierNoise());
-
         float[,] finalNoise = new float[worldSize.Y, worldSize.X];
-        
-        PerlinNoiseUtils.SaveNoiseToFile(baseNoise, "baseNoise.png");
-        PerlinNoiseUtils.SaveNoiseToFile(heightFactorNoise, "heightNoise.png");
         
         for (int row = 0; row < worldSize.Y; row++)
             for (int col = 0; col < worldSize.X; col++)
                 finalNoise[row, col] = baseNoise[row, col] + heightFactorNoise[row, col];
-        
-        PerlinNoiseUtils.SaveNoiseToFile(finalNoise, "finalNoise.png");
-        
+
+        return finalNoise;
+    }
+
+
+    public static TileWorld GenerateWorld(View view, Vector2u worldSize, int? seed)
+    {
+        float[,] noise = GenerateWorldNoise(worldSize, seed);
+
         TileWorld world = new(view, worldSize);
-        FillWorldFromNoiseAsync(world, finalNoise).Wait();
+        FillWorldFromNoiseAsync(world, noise).Wait();
 
         return world;
     }
