@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 
 namespace Stella.Game.Tiles;
@@ -10,7 +10,7 @@ namespace Stella.Game.Tiles;
 
 public class TileSet : Image
 {
-    public static TileSet Global { get; private set; }
+    public static TileSet Global { get; }
 
     public uint Width { get; }
     public uint Height { get; }

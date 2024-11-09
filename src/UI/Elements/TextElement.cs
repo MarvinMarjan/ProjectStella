@@ -1,7 +1,7 @@
 using System.IO;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.Game;
 
@@ -13,10 +13,10 @@ public class TextElement : Element
 {
     public static Font DefaultTextFont = new(Path.Combine(GlobalSettings.FontsDirectory, "itim.ttf"));
     
+    public override Transformable Transformable => Text;
+    
     public Text Text { get; protected set; }
     
-    public override Transformable Transformable => Text;
-
 
     public TextElement(Element? parent, Vector2f position, uint size, string text, Font? font = null) : base(parent)
     {
@@ -26,14 +26,6 @@ public class TextElement : Element
         };
         
         Position = position;
-    }
-
-
-    public override void Update()
-    {
-        UpdateSfmlProperties();
-        
-        base.Update();
     }
     
 

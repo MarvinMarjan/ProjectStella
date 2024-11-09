@@ -1,8 +1,6 @@
-using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
-
-using Stella.Areas;
+using SFML.Graphics;
 
 
 namespace Stella.Game;
@@ -13,10 +11,8 @@ public class Camera
     public MainWindow Window { get; private set; }
     
     // how much the mouse position changed since the last frame update
-    public Vector2f WorldMousePositionDelta => _oldWorldMousePosition - WorldMousePosition;
-    public Vector2f WorldMousePosition => Window.MapPixelToCoords(MousePosition);
+    public Vector2f WorldMousePositionDelta => _oldWorldMousePosition - Window.WorldMousePosition;
     private Vector2f _oldWorldMousePosition;
-    public Vector2i MousePosition => Mouse.GetPosition(Window);
 
     public float MouseScrollDelta { get; set; }
 
@@ -55,7 +51,7 @@ public class Camera
         
         MouseScrollDelta = 0f;
         
-        _oldWorldMousePosition = WorldMousePosition;
+        _oldWorldMousePosition = Window.WorldMousePosition;
     }
 
 

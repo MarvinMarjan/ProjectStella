@@ -1,5 +1,5 @@
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.Game.Tiles;
 

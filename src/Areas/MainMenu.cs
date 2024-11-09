@@ -16,11 +16,13 @@ public class MainMenu : Area
     public RectangleElement MenuBackground { get; }
     public ButtonElement PlayButton { get; }
     
+    
     public MainMenu(MainWindow window) : base(window)
     {
         BackgroundWorld = WorldGenerator.GenerateWorld(Window.View, new(128, 128), null);
         BackgroundWorld.StartUpdateThreads();
         
+        // TODO: TileWorld.GetCenterPosition()
         Window.View.Center = BackgroundWorld.Tiles[64, 64].Position;
         Window.Closed += (_, _) => BackgroundWorld.EndUpdateThreads();
         

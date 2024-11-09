@@ -1,7 +1,7 @@
 using System;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 
 namespace Stella.UI;
@@ -27,7 +27,7 @@ public enum AlignmentType
 }
 
 
-public interface IAlignmentable
+public interface IAlignable
 {
     Vector2f GetAlignmentPosition(AlignmentType alignment);
 }

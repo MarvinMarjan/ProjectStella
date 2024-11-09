@@ -6,10 +6,10 @@ namespace Stella.UI.Elements.Shapes;
 
 public abstract class ShapeElement : Element
 {
-    public Shape SfmlShape { get; }
-    
     public override Transformable Transformable => SfmlShape;
-
+    
+    public Shape SfmlShape { get; protected set; }
+    
     public float BorderSize { get; set; }
 
     public Color Color { get; set; }

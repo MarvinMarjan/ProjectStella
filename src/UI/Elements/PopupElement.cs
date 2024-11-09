@@ -6,7 +6,7 @@ namespace Stella.UI.Elements;
 
 public abstract class PopupElement : RectangleElement
 {
-    public TextElement Title { get; }
+    public TextElement Title { get; protected set; }
     
     
     public PopupElement(string title) : base(null, new(), new())

@@ -1,8 +1,8 @@
 using System;
 
-using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using SFML.Graphics;
 
 using Stella.UI.Elements.Shapes;
 
@@ -12,7 +12,7 @@ namespace Stella.UI.Elements;
 
 public class ButtonElement : RectangleElement, IClickable
 {
-    public TextElement Text { get; set; }
+    public TextElement Text { get; protected set; }
 
     protected bool IsMouseHover { get; set; }
     protected bool WasMouseHover { get; set; }
@@ -58,8 +58,8 @@ public class ButtonElement : RectangleElement, IClickable
         else if (!IsMouseHover && WasMouseHover)
             OnMouseLeave();
             
-        WasMouseDown = IsMouseDown;
         WasMouseHover = IsMouseHover;
+        WasMouseDown = IsMouseDown;
         
         base.Update();
     }

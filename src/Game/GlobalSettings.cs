@@ -5,6 +5,7 @@ using System.IO;
 namespace Stella.Game;
 
 
+// TODO: split this
 public static class GlobalSettings
 {
     public static uint AntialiasingLevel { get; set; } = 0;

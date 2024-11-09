@@ -8,7 +8,7 @@ namespace Stella.Game.Tiles;
 
 public class TileTextureAnimation
 {
-    public const int MaxTextureCount = 4;
+    public const uint MaxTextureCount = 4;
     
     public Texture[] Textures { get; }
 

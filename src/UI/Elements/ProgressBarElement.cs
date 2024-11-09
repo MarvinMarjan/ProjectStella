@@ -1,7 +1,7 @@
 using System;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.UI.Elements.Shapes;
 
@@ -63,7 +63,6 @@ public class ProgressBarElement : Element
             return;
         
         float normalizedProgress = (Progress - MinValue) / (MaxValue - MinValue);
-        
         Foreground.Size = new(Background.Size.X * normalizedProgress, Background.Size.Y);
 
         base.Update();

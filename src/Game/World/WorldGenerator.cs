@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.Game.Tiles;
 
@@ -53,8 +53,8 @@ public class WorldGenerator(int seed)
     public static async Task FillWorldFromNoiseAsync(TileWorld world, float[,] noise)
         => await Task.Run(() =>
         {
-            Parallel.For(0, world.Size.Y, new() { MaxDegreeOfParallelism = 5}, row => {
-                for (uint col = 0; col < world.Size.X; col++)
+            Parallel.For(0, world.TileCount.Y, new() { MaxDegreeOfParallelism = 5}, row => {
+                for (uint col = 0; col < world.TileCount.X; col++)
                 {
                     float value = NoiseRange.ToUnsignedNoiseValue(noise[row, col]);
                     world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);

@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.Game.Tiles;
 
@@ -15,9 +15,10 @@ public class TileWorld
 {
     public View View { get; }
 
-    public Tile[,] Tiles { get; }
+    public Tile[,] Tiles { get; } // the same tiles present in Chunks
     public Chunk[,] Chunks { get; }
-    public Vector2u Size { get; }
+    
+    public Vector2u TileCount { get; }
     
     private readonly Thread _chunkUpdateThread;
     private readonly Thread _chunkVerticesUpdateThread;
@@ -27,16 +28,16 @@ public class TileWorld
     public EventHandler<bool>? MinimizedDrawingChangedEvent;
 
     
-    public TileWorld(View view, Vector2u worldSize)
+    public TileWorld(View view, Vector2u worldTileCount)
     {
-        if (worldSize.X != worldSize.Y || worldSize.X % Chunk.ChunkSize != 0)
+        if (worldTileCount.X != worldTileCount.Y || worldTileCount.X % Chunk.ChunkSize != 0)
             throw new ArgumentException($"Invalid world size; it must be symmetrical and divisible by {Chunk.ChunkSize}.");
 
         View = view;
 
-        Tiles = new Tile[worldSize.Y, worldSize.X];
-        Chunks = new Chunk[worldSize.Y / Chunk.ChunkSize, worldSize.X / Chunk.ChunkSize];
-        Size = worldSize;
+        Tiles = new Tile[worldTileCount.Y, worldTileCount.X];
+        Chunks = new Chunk[worldTileCount.Y / Chunk.ChunkSize, worldTileCount.X / Chunk.ChunkSize];
+        TileCount = worldTileCount;
 
         InitializeTileMatrix();
         InitializeChunks();
@@ -59,6 +60,9 @@ public class TileWorld
     {
         _chunkUpdateThreadCancellationTokenSource.Cancel();
         _chunkVerticesUpdateThreadCancellationTokenSource.Cancel();
+
+        _chunkUpdateThread.Join();
+        _chunkVerticesUpdateThread.Join();
     }
 
 
@@ -104,9 +108,9 @@ public class TileWorld
         
         Vector2f position = new(0, 0);
 
-        for (int row = 0; row < Size.Y; row++)
+        for (int row = 0; row < TileCount.Y; row++)
         {
-            for (int col = 0; col < Size.X; col++)
+            for (int col = 0; col < TileCount.X; col++)
             {
                 Tiles[row, col] = new(position, tileSize);
                 position.X += tileSize;

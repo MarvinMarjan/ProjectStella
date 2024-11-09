@@ -1,6 +1,6 @@
-using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using SFML.Graphics;
 
 using Stella.Areas;
 using Stella.Game;

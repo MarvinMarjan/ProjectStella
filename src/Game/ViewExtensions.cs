@@ -1,5 +1,5 @@
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 
 namespace Stella.Game;

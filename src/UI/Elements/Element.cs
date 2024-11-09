@@ -9,14 +9,12 @@ using Stella.Game;
 namespace Stella.UI.Elements;
 
 
-public abstract class Element : IUpdateable, IDrawable, IAlignmentable
+public abstract class Element : IUpdateable, IDrawable, IAlignable
 {
     public Element? Parent { get; set; }
     public List<Element> Children { get; }
     
     public abstract Transformable Transformable { get; }
-    
-    public bool Visible { get; set; }
     
     public Vector2f Position { get; set; }
     public Vector2f AbsolutePosition
@@ -38,6 +36,7 @@ public abstract class Element : IUpdateable, IDrawable, IAlignmentable
     public AlignmentType? Alignment { get; set; }
     public Vector2f AlignmentMargin { get; set; }
 
+    public bool Visible { get; set; }
     public bool DrawElementBoundaries { get; set; }
 
 

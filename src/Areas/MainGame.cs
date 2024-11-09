@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 using Stella.Game;
 using Stella.Game.Tiles;
@@ -18,9 +18,9 @@ public class MainGame : Area
 {
     public ProgressBarPopup WorldGenerationProgressPopup { get; }
     public TextElement WorldGenerationStage { get; }
-    public bool _wasWorldGenerated, _worldGenerated;
+    private bool _wasWorldGenerated, _worldGenerated;
     
-    public TileWorld World { get; } 
+    public TileWorld World { get; private set; } 
     public Camera? Camera { get; private set; }
     
     public event EventHandler? WorldGenerated;
@@ -38,7 +38,6 @@ public class MainGame : Area
         
         _wasWorldGenerated = _worldGenerated = false;
         
-        // TODO: improve this
         Vector2u worldSize = new(1024, 1024);
         World = new(Window.View, worldSize);
 
@@ -57,7 +56,7 @@ public class MainGame : Area
         Window.Closed += (_, _) => World.EndUpdateThreads();
         Window.MouseWheelScrolled += (_, args) => Camera.MouseScrollDelta = args.Delta;
         
-        Window.View.Center = World.Tiles[World.Size.X / 2, World.Size.Y / 2].Position;
+        Window.View.Center = World.Tiles[World.TileCount.X / 2, World.TileCount.Y / 2].Position;
         
         WorldGenerated?.Invoke(this, EventArgs.Empty);
     }
@@ -94,7 +93,7 @@ public class MainGame : Area
     
     private float CalculateWorldGenerationProgress(TileWorld world)
     {
-        uint worldSize = world.Size.X * world.Size.Y;
+        uint worldSize = world.TileCount.X * world.TileCount.Y;
         uint counter = 0;
         
         foreach (Tile tile in world.Tiles)

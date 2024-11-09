@@ -1,7 +1,5 @@
-using System;
-
-using SFML.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 
 namespace Stella.Game.Tiles;
@@ -9,10 +7,9 @@ namespace Stella.Game.Tiles;
 
 public class TileMapRenderer
 {
-    private object _renderLock = new();
+    private readonly object _renderLock = new();
     
     private Tile[,] _tiles;
-
     public Tile[,] Tiles
     {
         get => _tiles;
@@ -61,7 +58,7 @@ public class TileMapRenderer
             if (tile.Object is not null)
                 UpdateVerticesOfTile(tile.Object, currentIndex);
                                 
-            // we are using triangles, so it's 6 vertices
+            // we are using triangles to represent tiles, so we got 2 triangles, resulting in 6 vertices
             currentIndex += 6;
         }
     }
