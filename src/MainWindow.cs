@@ -21,9 +21,9 @@ public class MainWindow : RenderWindow
     public View View { get; set; }
     
     
-    public MainWindow() : base(VideoMode.FullscreenModes[0], "Project Stella", Styles.Default, new()
+    public MainWindow() : base(VideoMode.DesktopMode, "Project Stella", Styles.Default, new()
     {
-        AntialiasingLevel = GlobalSettings.AntialiasingLevel
+        AntialiasingLevel = 0
     })
     {
         Current = this;

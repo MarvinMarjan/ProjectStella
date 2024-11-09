@@ -1,9 +1,5 @@
-using System.IO;
-
 using SFML.System;
 using SFML.Graphics;
-
-using Stella.Game;
 
 
 namespace Stella.UI.Elements;
@@ -11,7 +7,7 @@ namespace Stella.UI.Elements;
 
 public class TextElement : Element
 {
-    public static Font DefaultTextFont = new(Path.Combine(GlobalSettings.FontsDirectory, "itim.ttf"));
+    public static Font DefaultTextFont = new(ResourceManager.GetFontFilePath("itim.ttf"));
     
     public override Transformable Transformable => Text;
     
@@ -35,9 +31,8 @@ public class TextElement : Element
         
         base.Draw(target);
     }
-
-    // TODO: use GetGlobalBounds for everything
-
+    
+    
     public override FloatRect GetBounds()
         => Text.GetGlobalBounds();
 

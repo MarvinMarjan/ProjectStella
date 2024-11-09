@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using SFML.System;
 using SFML.Graphics;
-
+using SFML.Window;
 using Stella.Game.Tiles;
 
 
@@ -19,6 +19,8 @@ public class TileWorld
     public Chunk[,] Chunks { get; }
     
     public Vector2u TileCount { get; }
+    
+    public bool DrawChunkBounds { get; set; }
     
     private readonly Thread _chunkUpdateThread;
     private readonly Thread _chunkVerticesUpdateThread;
@@ -69,15 +71,11 @@ public class TileWorld
     private void ChunkUpdateThread(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
-        {
-            // TODO: when implementing game logic, using threads for updating stuff will probably suck
-            
             Parallel.For(0, Chunks.GetLength(0), new ParallelOptions { MaxDegreeOfParallelism = 3 }, row =>
             {
                 for (int col = 0; col < Chunks.GetLength(1); col++)
                     Chunks[row, col].Update();
             });
-        }
     }
 
 
@@ -95,10 +93,21 @@ public class TileWorld
     }
 
 
-    public void Draw(RenderTarget window)
+    public void Draw(RenderTarget target)
     {
         foreach (Chunk chunk in Chunks)
-            chunk.Draw(window);
+        {
+            chunk.Draw(target);
+            
+            if (DrawChunkBounds)
+                target.Draw(new RectangleShape(chunk.Size)
+                {
+                    Position = chunk.Position,
+                    FillColor = Color.Transparent,
+                    OutlineColor = Color.Red,
+                    OutlineThickness = 2f * (View.Size.X / VideoMode.DesktopMode.Width)
+                });
+        }
     }
     
     
@@ -140,4 +149,8 @@ public class TileWorld
                 Chunks[chunkRow, chunkCol].Tiles[relativeTileRow, relativeTileCol] = Tiles[row, col];
             }
     }
+
+
+    public Vector2f GetCenterPosition()
+        => Tiles[TileCount.Y / 2, TileCount.X / 2].Position;
 }

@@ -55,8 +55,8 @@ public class MainGame : Area
         
         Window.Closed += (_, _) => World.EndUpdateThreads();
         Window.MouseWheelScrolled += (_, args) => Camera.MouseScrollDelta = args.Delta;
-        
-        Window.View.Center = World.Tiles[World.TileCount.X / 2, World.TileCount.Y / 2].Position;
+
+        Window.View.Center = World.GetCenterPosition();
         
         WorldGenerated?.Invoke(this, EventArgs.Empty);
     }

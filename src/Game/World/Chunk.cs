@@ -53,16 +53,6 @@ public class Chunk : IDrawable, IUpdateable
             return;
         
         Renderer.Render(target);
-        
-        // TODO: move this to other place:
-        // if (renderOutline)
-        //     target.Draw(new RectangleShape(Size)
-        //     {
-        //         Position = Position,
-        //         FillColor = Color.Transparent,
-        //         OutlineColor = Color.Red,
-        //         OutlineThickness = 2f * (Camera.View.Size.X / Camera.DefaultViewSize.X)
-        //     });
     }
 
 

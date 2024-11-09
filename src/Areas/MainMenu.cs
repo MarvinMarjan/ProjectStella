@@ -22,8 +22,7 @@ public class MainMenu : Area
         BackgroundWorld = WorldGenerator.GenerateWorld(Window.View, new(128, 128), null);
         BackgroundWorld.StartUpdateThreads();
         
-        // TODO: TileWorld.GetCenterPosition()
-        Window.View.Center = BackgroundWorld.Tiles[64, 64].Position;
+        Window.View.Center = BackgroundWorld.GetCenterPosition();
         Window.Closed += (_, _) => BackgroundWorld.EndUpdateThreads();
         
         MenuBackground = new(null, new(), new(220f, 300f))

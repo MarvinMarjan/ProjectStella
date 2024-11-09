@@ -66,7 +66,7 @@ public static class TileIndex
 
     public static Image[] ImageArrayFromTilesDirectory(string dirName)
     {
-        string[] files = Directory.GetFiles(Path.Combine(GlobalSettings.TilesSpriteDirectory, dirName));
+        string[] files = Directory.GetFiles(ResourceManager.GetTileDirectoryPath(dirName));
         Image[] images = new Image[files.Length];
 
         for (int i = 0; i < files.Length; i++)
