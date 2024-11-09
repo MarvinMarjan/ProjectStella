@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using SFML.System;
@@ -39,6 +40,9 @@ public abstract class Element : IUpdateable, IDrawable, IAlignable
     public bool Visible { get; set; }
     public bool DrawElementBoundaries { get; set; }
 
+    public event EventHandler? UpdateEvent;
+    public event EventHandler? DrawEvent;
+
 
     protected Element(Element? parent)
     {
@@ -61,6 +65,8 @@ public abstract class Element : IUpdateable, IDrawable, IAlignable
      
         UpdateSfmlProperties();
         
+        UpdateEvent?.Invoke(this, EventArgs.Empty);
+        
         foreach (Element child in Children)
             child.Update();
     }
@@ -82,6 +88,8 @@ public abstract class Element : IUpdateable, IDrawable, IAlignable
                 OutlineThickness = 1f
             });
         }
+        
+        DrawEvent?.Invoke(this, EventArgs.Empty);
         
         foreach (Element child in Children)
             child.Draw(target);

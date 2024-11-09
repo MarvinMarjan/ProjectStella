@@ -1,3 +1,4 @@
+using System;
 using Stella.UI.Elements.Shapes;
 
 
@@ -7,6 +8,10 @@ namespace Stella.UI.Elements;
 public abstract class PopupElement : RectangleElement
 {
     public TextElement Title { get; protected set; }
+    
+    public bool IsClosed { get; protected set; }
+    
+    public event EventHandler? ClosedEvent;
     
     
     public PopupElement(string title) : base(null, new(), new())
@@ -23,5 +28,12 @@ public abstract class PopupElement : RectangleElement
         
         // not visible by default
         Hide();
+    }
+
+
+    protected virtual void OnClosed()
+    {
+        Hide();
+        ClosedEvent?.Invoke(this, EventArgs.Empty);
     }
 }

@@ -25,10 +25,8 @@ public class ProgressBarPopup : PopupElement
         if (!Visible)
             return;
         
-        // TODO: Add a way to fully delete an element
-        
-        if (CloseOnComplete && ProgressBar.IsAtMax)
-            Hide();
+        if (!IsClosed && CloseOnComplete && ProgressBar.IsAtMax)
+            OnClosed();
         
         base.Update();
     }

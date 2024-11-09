@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 
 using SFML.System;
@@ -16,14 +15,13 @@ namespace Stella.Areas;
 
 public class MainGame : Area
 {
-    public ProgressBarPopup WorldGenerationProgressPopup { get; }
+    public ProgressBarPopup? WorldGenerationProgressPopup { get; private set; }
     public TextElement WorldGenerationStage { get; }
-    private bool _wasWorldGenerated, _worldGenerated;
     
     public TileWorld World { get; private set; } 
     public Camera? Camera { get; private set; }
     
-    public event EventHandler? WorldGenerated;
+    private bool _worldGenerated;
     
     
     public MainGame(MainWindow window) : base(window)
@@ -31,12 +29,19 @@ public class MainGame : Area
         WorldGenerationProgressPopup = new("World Generation Progress");
         WorldGenerationProgressPopup.Show();
 
+        WorldGenerationProgressPopup.UpdateEvent += (_, _) =>
+            WorldGenerationProgressPopup.ProgressBar.Progress = CalculateWorldGenerationProgress(World!);
+
+        WorldGenerationProgressPopup.ClosedEvent += (_, _) =>
+        {
+            WorldGenerationProgressPopup = null;
+            OnWorldGenerated();
+        };
+        
         WorldGenerationStage = new(WorldGenerationProgressPopup, new(), 30, "Starting")
         {
             Alignment = AlignmentType.Center
         };
-        
-        _wasWorldGenerated = _worldGenerated = false;
         
         Vector2u worldSize = new(1024, 1024);
         World = new(Window.View, worldSize);
@@ -49,6 +54,8 @@ public class MainGame : Area
 
     private void OnWorldGenerated()
     {
+        _worldGenerated = true;
+        
         Camera = new(Window);
         
         World.StartUpdateThreads();
@@ -57,28 +64,16 @@ public class MainGame : Area
         Window.MouseWheelScrolled += (_, args) => Camera.MouseScrollDelta = args.Delta;
 
         Window.View.Center = World.GetCenterPosition();
-        
-        WorldGenerated?.Invoke(this, EventArgs.Empty);
     }
 
     
     public sealed override void Update()
     {
         Camera?.Update();
-
-        WorldGenerationProgressPopup.ProgressBar.Progress = CalculateWorldGenerationProgress(World);
-        
-        _worldGenerated = WorldGenerationProgressPopup.ProgressBar.IsAtMax;
-        
-        if (!_wasWorldGenerated && _worldGenerated)
-            OnWorldGenerated();
+        WorldGenerationProgressPopup?.Update();
         
         if (_worldGenerated)
             World.Update();
-
-        WorldGenerationProgressPopup.Update();
-        
-        _wasWorldGenerated = _worldGenerated;
     }
 
 
@@ -87,7 +82,7 @@ public class MainGame : Area
         if (_worldGenerated)
             World.Draw(Window);
         
-        WorldGenerationProgressPopup.Draw(target);
+        WorldGenerationProgressPopup?.Draw(target);
     }
     
     
