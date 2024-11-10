@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using SFML.System;
@@ -10,12 +11,23 @@ using Stella.Game.Tiles;
 namespace Stella.Game.World;
 
 
-public class WorldGenerator(int seed)
+public enum WorldGenerationStage
 {
-    public int Seed { get; } = seed;
+    None,
+    
+    NoiseGeneration,
+    WorldInitialization,
+    WorldTerrainFilling,
+    LoadingChunks
+}
 
 
-    private FastNoiseLite GetDefaultNoise()
+public class WorldNoiseGenerator(int? seed = null)
+{
+    public int Seed { get; } = seed ?? new Random().Next();
+    
+    
+    public FastNoiseLite GetDefaultNoise()
     {
         FastNoiseLite noise = new(Seed);
         
@@ -36,7 +48,7 @@ public class WorldGenerator(int seed)
         return noise;
     }
 
-    private FastNoiseLite GetTerrainHeightMultiplierNoise()
+    public FastNoiseLite GetTerrainHeightMultiplierNoise()
     {
         FastNoiseLite noise = GetDefaultNoise();
         noise.SetFrequency(0.0007f);
@@ -44,48 +56,97 @@ public class WorldGenerator(int seed)
 
         return noise;
     }
-
     
-    private float[,] GenerateNoise(Vector2u worldSize, FastNoiseLite noise)
+    
+    public static float[,] GenerateNoiseMatrix(Vector2u worldSize, FastNoiseLite noise)
         => noise.FastNoiseLiteToFloatMatrix(worldSize.X, worldSize.Y);
 
 
-    public static async Task FillWorldFromNoiseAsync(TileWorld world, float[,] noise)
-        => await Task.Run(() =>
-        {
-            Parallel.For(0, world.TileCount.Y, new() { MaxDegreeOfParallelism = 5}, row => {
-                for (uint col = 0; col < world.TileCount.X; col++)
-                {
-                    float value = NoiseRange.ToUnsignedNoiseValue(noise[row, col]);
-                    world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
-                }
-            });
-        });
-
-
-    public static float[,] GenerateWorldNoise(Vector2u worldSize, int? seed)
+    public static float[,] GenerateWorldNoise(Vector2u worldSize, int? seed = null)
     {
-        WorldGenerator generator = new(seed ?? new Random().Next());
-        
-        float[,] baseNoise = generator.GenerateNoise(worldSize, generator.GetDefaultNoise());
-        float[,] heightFactorNoise = generator.GenerateNoise(worldSize, generator.GetTerrainHeightMultiplierNoise());
+        WorldNoiseGenerator generator = new(seed);
+
+        float[,] baseNoise = GenerateNoiseMatrix(worldSize, generator.GetDefaultNoise());
+        float[,] heightFactorNoise = GenerateNoiseMatrix(worldSize, generator.GetTerrainHeightMultiplierNoise());
         float[,] finalNoise = new float[worldSize.Y, worldSize.X];
-        
+
         for (int row = 0; row < worldSize.Y; row++)
             for (int col = 0; col < worldSize.X; col++)
                 finalNoise[row, col] = baseNoise[row, col] + heightFactorNoise[row, col];
 
         return finalNoise;
     }
+}
 
 
-    public static TileWorld GenerateWorld(View view, Vector2u worldSize, int? seed)
+public class WorldGenerator
+{
+    public TileWorld? TileWorld { get; private set; }
+    public WorldGenerationStage Stage { get; private set; }
+
+    public View View { get; }
+    public Vector2u WorldSize { get; }
+    public int Seed { get; }
+
+    private Thread? _worldGenerationThread;
+
+    
+    public WorldGenerator(View view, Vector2u worldSize, int? seed = null)
     {
-        float[,] noise = GenerateWorldNoise(worldSize, seed);
-
-        TileWorld world = new(view, worldSize);
-        FillWorldFromNoiseAsync(world, noise).Wait();
-
-        return world;
+        Stage = WorldGenerationStage.None;
+        
+        View = view;
+        WorldSize = worldSize;
+        Seed = seed ?? new Random().Next();
     }
+
+
+    public static TileWorld GenerateWorld(View view, Vector2u worldSize, int? seed = null)
+    {
+        WorldGenerator generator = new(view, worldSize, seed);
+        generator.StartWorldGeneration();
+        generator.WaitWorldGenerationFinish();
+
+        return generator.TileWorld!;
+    }
+    
+
+    public void StartWorldGeneration()
+    {
+        if (_worldGenerationThread is not null && _worldGenerationThread.IsAlive)
+            throw new InvalidOperationException("World generation has already been started.");
+            
+        _worldGenerationThread = new(WorldGenerationThread);
+        _worldGenerationThread.Priority = ThreadPriority.Highest;
+        _worldGenerationThread.Start();
+    }
+    
+    public void WaitWorldGenerationFinish()
+        => _worldGenerationThread?.Join();
+
+
+    private void WorldGenerationThread()
+    {
+        Stage = WorldGenerationStage.NoiseGeneration;
+        float[,] noise = WorldNoiseGenerator.GenerateWorldNoise(WorldSize, Seed);
+
+        Stage++;
+        TileWorld = new(View, WorldSize);
+
+        Stage++;
+        FillWorldFromNoise(TileWorld, noise);
+
+        Stage++;
+        TileWorld.UpdateAllChunksVertices(true);
+    }
+
+
+    public static void FillWorldFromNoise(TileWorld world, float[,] noise)
+        => Parallel.For(0, world.TileCount.Y, new() { MaxDegreeOfParallelism = 5}, row => {
+                for (uint col = 0; col < world.TileCount.X; col++)
+                {
+                    float value = NoiseRange.ToUnsignedNoiseValue(noise[row, col]);
+                    world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
+                }
+        });
 }

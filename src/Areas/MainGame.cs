@@ -1,5 +1,3 @@
-using System.Threading;
-
 using SFML.System;
 using SFML.Graphics;
 
@@ -16,44 +14,68 @@ namespace Stella.Areas;
 public class MainGame : Area
 {
     public ProgressBarPopup? WorldGenerationProgressPopup { get; private set; }
-    public TextElement WorldGenerationStage { get; }
-    
-    public TileWorld World { get; private set; } 
-    public Camera? Camera { get; private set; }
-    
+    public TextElement WorldGenerationStageText { get; }
+
+    private WorldGenerator _worldGenerator;
+    public TileWorld? World => _worldGenerator.TileWorld;
     private bool _worldGenerated;
+    
+    public Camera? Camera { get; private set; }
     
     
     public MainGame(MainWindow window) : base(window)
     {
+        _worldGenerator = new(Window.View, new(64 * 35, 64 * 35));
+        _worldGenerator.StartWorldGeneration();
+        
         WorldGenerationProgressPopup = new("World Generation Progress");
         WorldGenerationProgressPopup.Show();
 
-        WorldGenerationProgressPopup.UpdateEvent += (_, _) =>
-            WorldGenerationProgressPopup.ProgressBar.Progress = CalculateWorldGenerationProgress(World!);
-
-        WorldGenerationProgressPopup.ClosedEvent += (_, _) =>
-        {
-            WorldGenerationProgressPopup = null;
-            OnWorldGenerated();
-        };
+        WorldGenerationProgressPopup.UpdateEvent += (_, _) => OnWorldProgressPopupUpdated();
+        WorldGenerationProgressPopup.ClosedEvent += (_, _) => OnWorldGenerated();
         
-        WorldGenerationStage = new(WorldGenerationProgressPopup, new(), 30, "Starting")
+        WorldGenerationStageText = new(WorldGenerationProgressPopup, new(), 30, "Starting")
         {
             Alignment = AlignmentType.Center
         };
-        
-        Vector2u worldSize = new(1024, 1024);
-        World = new(Window.View, worldSize);
+    }
 
-        float[,] noise = WorldGenerator.GenerateWorldNoise(worldSize, null);
+    
+    public sealed override void Update()
+    {
+        if (_worldGenerated)
+            World?.Update();
+
+        Camera?.Update();
+        WorldGenerationProgressPopup?.Update();
+    }
+
+
+    public sealed override void Draw(RenderTarget target)
+    {
+        if (_worldGenerated)
+            World?.Draw(Window);
         
-        new Thread(() => WorldGenerator.FillWorldFromNoiseAsync(World, noise).Wait()).Start();
+        WorldGenerationProgressPopup?.Draw(target);
+    }
+    
+    
+    private void OnWorldProgressPopupUpdated()
+    {
+        WorldGenerationStageText.Text.DisplayedString = WorldGenerationStageToString(_worldGenerator.Stage);
+            
+        if (World is not null)
+            WorldGenerationProgressPopup!.ProgressBar.Progress = CalculateWorldGenerationProgress(World);
     }
 
 
     private void OnWorldGenerated()
     {
+        if (World is null)
+            return;
+        
+        WorldGenerationProgressPopup = null;
+        
         _worldGenerated = true;
         
         Camera = new(Window);
@@ -68,25 +90,6 @@ public class MainGame : Area
 
         Window.View.Center = World.GetCenterPosition();
     }
-
-    
-    public sealed override void Update()
-    {
-        if (_worldGenerated)
-            World.Update();
-
-        Camera?.Update();
-        WorldGenerationProgressPopup?.Update();
-    }
-
-
-    public sealed override void Draw(RenderTarget target)
-    {
-        if (_worldGenerated)
-            World.Draw(Window);
-        
-        WorldGenerationProgressPopup?.Draw(target);
-    }
     
     
     private float CalculateWorldGenerationProgress(TileWorld world)
@@ -100,4 +103,16 @@ public class MainGame : Area
         
         return counter / (float)worldSize;
     }
+
+
+    private static string WorldGenerationStageToString(WorldGenerationStage stage) => stage switch
+    {
+        WorldGenerationStage.None => "Starting",
+        WorldGenerationStage.NoiseGeneration => "Generating noise",
+        WorldGenerationStage.WorldInitialization => "Initializing world",
+        WorldGenerationStage.WorldTerrainFilling => "Filling terrain",
+        WorldGenerationStage.LoadingChunks => "Loading chunks",
+        
+        _ => "Doing something"
+    };
 }

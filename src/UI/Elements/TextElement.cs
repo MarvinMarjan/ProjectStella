@@ -1,3 +1,5 @@
+using System;
+
 using SFML.System;
 using SFML.Graphics;
 
@@ -11,7 +13,7 @@ public class TextElement : Element
     
     public override Transformable Transformable => Text;
     
-    public Text Text { get; protected set; }
+    public Text Text { get; protected set; } 
     
 
     public TextElement(Element? parent, Vector2f position, uint size, string text, Font? font = null) : base(parent)
@@ -48,5 +50,15 @@ public class TextElement : Element
         position -= localBounds.Position;
         
         return position;
+    }
+
+
+    protected override void UpdateSfmlProperties()
+    {
+        base.UpdateSfmlProperties();
+
+        // round to avoid blurry text
+        Transformable.Position = new(MathF.Round(AbsolutePosition.X), MathF.Round(AbsolutePosition.Y));
+        Transformable.Origin = new(MathF.Round(Origin.X), MathF.Round(Origin.Y));
     }
 }
