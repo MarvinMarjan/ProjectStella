@@ -40,9 +40,10 @@ public class MainWindow : RenderWindow
     public void Update()
     {
         DispatchEvents();
-        SetView(View);
-
+        
         CurrentArea?.Update();
+
+        SetView(View); // update view after area
     }
     
     

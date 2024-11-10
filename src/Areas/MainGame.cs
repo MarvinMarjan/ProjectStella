@@ -57,7 +57,10 @@ public class MainGame : Area
         _worldGenerated = true;
         
         Camera = new(Window);
+        Camera.BoundsLimit = new(World.Tiles[0, 0].Position, (Vector2f)World.TileCount * TileDrawable.DefaultTilePixelSize);
         
+        // first chunks vertices update
+        World.UpdateAllChunksVertices(true);
         World.StartUpdateThreads();
         
         Window.Closed += (_, _) => World.EndUpdateThreads();
@@ -69,11 +72,11 @@ public class MainGame : Area
     
     public sealed override void Update()
     {
-        Camera?.Update();
-        WorldGenerationProgressPopup?.Update();
-        
         if (_worldGenerated)
             World.Update();
+
+        Camera?.Update();
+        WorldGenerationProgressPopup?.Update();
     }
 
 

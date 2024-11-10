@@ -17,6 +17,9 @@ public class Camera
     public float MouseScrollDelta { get; set; }
 
     public Vector2f DefaultViewSize { get; }
+
+    public FloatRect Bounds => Window.View.ViewToRect();
+    public FloatRect BoundsLimit { get; set; }
     
     public float ZoomOutFactor { get; private set; } = 1.3f; 
     public float ZoomInFactor { get; private set; } = 0.7f;
@@ -48,10 +51,27 @@ public class Camera
             float zoom = MouseScrollDelta > 0 ? ZoomInFactor : ZoomOutFactor;
             Window.View.Zoom(zoom);
         }
+
+        CheckBoundsLimits();
         
         MouseScrollDelta = 0f;
         
         _oldWorldMousePosition = Window.WorldMousePosition;
+    }
+
+    private void CheckBoundsLimits()
+    {
+        if (Bounds.Position.X < BoundsLimit.Position.X)
+            Window.View.MoveToPosition(new(BoundsLimit.Position.X, Bounds.Position.Y));
+        
+        if (Bounds.Position.Y < BoundsLimit.Position.Y)
+            Window.View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Position.Y));
+
+        if (Bounds.Position.X + Bounds.Width > BoundsLimit.Position.X + BoundsLimit.Width)
+            Window.View.MoveToPosition(new(BoundsLimit.Position.X + BoundsLimit.Width - Bounds.Width, Bounds.Position.Y));
+        
+        if (Bounds.Position.Y + Bounds.Height > BoundsLimit.Position.Y + BoundsLimit.Height)
+            Window.View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Position.Y + BoundsLimit.Height - Bounds.Height));
     }
 
 

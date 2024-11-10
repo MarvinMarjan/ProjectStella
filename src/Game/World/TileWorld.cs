@@ -82,8 +82,14 @@ public class TileWorld
     private void ChunkVerticesUpdateThread(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
-            foreach (Chunk chunk in Chunks)
-                chunk.UpdateVertices();
+            UpdateAllChunksVertices();
+    }
+
+
+    public void UpdateAllChunksVertices(bool updateNonVisible = false)
+    {
+        foreach (Chunk chunk in Chunks)
+            chunk.UpdateVertices(updateNonVisible);
     }
 
 

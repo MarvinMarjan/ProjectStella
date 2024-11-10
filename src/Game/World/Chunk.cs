@@ -38,9 +38,9 @@ public class Chunk : IDrawable, IUpdateable
     }
 
 
-    public void UpdateVertices()
+    public void UpdateVertices(bool updateNonVisible = false)
     {
-        if (!IsVisibleToWindow())
+        if (!IsVisibleToWindow() && !updateNonVisible)
             return;
         
         Renderer.UpdateVertices();
