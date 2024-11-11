@@ -11,6 +11,13 @@ using Stella.UI.Elements;
 namespace Stella.Areas;
 
 
+// TODO: add ability to change the tiles in the world.
+// TODO: add world saving. save seed and tiles changed by the player; use binary files to store it
+// TODO: add interface (GUI) to create, select and remove worlds.
+// TODO: add animations to the tiles
+// TODO: add lighting (day cycle maybe?)
+
+
 public class MainGame : Area
 {
     public ProgressBarPopup? WorldGenerationProgressPopup { get; private set; }
