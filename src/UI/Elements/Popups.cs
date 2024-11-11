@@ -25,8 +25,8 @@ public class ProgressBarPopup : PopupElement
         if (!Visible)
             return;
         
-        if (!IsClosed && CloseOnComplete && ProgressBar.IsAtMax)
-            OnClosed();
+        if (!IsClosed && CloseOnComplete && ProgressBar.Completed)
+            Close();
         
         base.Update();
     }

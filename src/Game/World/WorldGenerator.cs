@@ -18,7 +18,8 @@ public enum WorldGenerationStage
     NoiseGeneration,
     WorldInitialization,
     WorldTerrainFilling,
-    LoadingChunks
+    LoadingChunks,
+    Finished
 }
 
 
@@ -132,12 +133,14 @@ public class WorldGenerator
 
         Stage++;
         TileWorld = new(View, WorldSize);
-
+        
         Stage++;
         FillWorldFromNoise(TileWorld, noise);
 
         Stage++;
         TileWorld.UpdateAllChunksVertices(true);
+
+        Stage++;
     }
 
 

@@ -31,6 +31,9 @@ public abstract class PopupElement : RectangleElement
     }
 
 
+    public void Close() => OnClosed();
+
+
     protected virtual void OnClosed()
     {
         Hide();

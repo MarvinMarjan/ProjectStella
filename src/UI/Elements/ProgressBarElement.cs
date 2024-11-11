@@ -35,6 +35,11 @@ public class ProgressBarElement : Element
     public bool IsAtMax => Progress >= MaxValue;
     public bool IsAtMin => Progress <= MinValue;
 
+    public bool Completed => IsAtMax;
+    private bool _wasCompleted;
+    
+    public event EventHandler? CompletedEvent;
+
 
     public ProgressBarElement(Element? parent, Vector2f position, Vector2f size, float minValue = 0f, float maxValue = 1f) : base(parent)
     {
@@ -62,9 +67,14 @@ public class ProgressBarElement : Element
         if (!Visible)
             return;
         
-        float normalizedProgress = (Progress - MinValue) / (MaxValue - MinValue);
+        if (!_wasCompleted && Completed)
+            CompletedEvent?.Invoke(this, EventArgs.Empty);
+        
+        float normalizedProgress = (Progress - MinValue) / (MaxValue - MinValue); 
         Foreground.Size = new(Background.Size.X * normalizedProgress, Background.Size.Y);
-
+        
+        _wasCompleted = Completed;
+        
         base.Update();
     }
 

@@ -25,7 +25,7 @@ public class MainGame : Area
     
     public MainGame(MainWindow window) : base(window)
     {
-        _worldGenerator = new(Window.View, new(64 * 35, 64 * 35));
+        _worldGenerator = new(Window.View, new(64 * 25, 64 * 25));
         _worldGenerator.StartWorldGeneration();
         
         WorldGenerationProgressPopup = new("World Generation Progress");
@@ -33,6 +33,7 @@ public class MainGame : Area
 
         WorldGenerationProgressPopup.UpdateEvent += (_, _) => OnWorldProgressPopupUpdated();
         WorldGenerationProgressPopup.ClosedEvent += (_, _) => OnWorldGenerated();
+        WorldGenerationProgressPopup.CloseOnComplete = false;
         
         WorldGenerationStageText = new(WorldGenerationProgressPopup, new(), 30, "Starting")
         {
@@ -46,6 +47,9 @@ public class MainGame : Area
         if (_worldGenerated)
             World?.Update();
 
+        if (WorldGenerationProgressPopup is not null && _worldGenerator.Stage == WorldGenerationStage.Finished)
+            WorldGenerationProgressPopup.Close();
+        
         Camera?.Update();
         WorldGenerationProgressPopup?.Update();
     }
@@ -81,8 +85,6 @@ public class MainGame : Area
         Camera = new(Window);
         Camera.BoundsLimit = new(World.Tiles[0, 0].Position, (Vector2f)World.TileCount * TileDrawable.DefaultTilePixelSize);
         
-        // first chunks vertices update
-        World.UpdateAllChunksVertices(true);
         World.StartUpdateThreads();
         
         Window.Closed += (_, _) => World.EndUpdateThreads();
