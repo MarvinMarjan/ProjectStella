@@ -54,6 +54,8 @@ public class Camera
         Window = window;
         
         DefaultViewSize = Window.View.Size;
+        
+        Window.MouseWheelScrolled += (_, args) => MouseScrollDelta = args.Delta;
     }
     
 

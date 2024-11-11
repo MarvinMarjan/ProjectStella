@@ -131,16 +131,12 @@ public class WorldGenerator
         Stage = WorldGenerationStage.NoiseGeneration;
         float[,] noise = WorldNoiseGenerator.GenerateWorldNoise(WorldSize, Seed);
 
+        Stage++; TileWorld = new(View, WorldSize);
+        Stage++; FillWorldFromNoise(TileWorld, noise);
+        Stage++; TileWorld.UpdateAllChunksVertices(true);
         Stage++;
-        TileWorld = new(View, WorldSize);
-        
-        Stage++;
-        FillWorldFromNoise(TileWorld, noise);
 
-        Stage++;
-        TileWorld.UpdateAllChunksVertices(true);
-
-        Stage++;
+        View.Center = TileWorld.GetCenterPosition();
     }
 
 

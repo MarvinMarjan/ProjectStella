@@ -15,15 +15,13 @@ public class MainMenu : Area
     
     public RectangleElement MenuBackground { get; }
     public ButtonElement PlayButton { get; }
+    public ButtonElement ExitButton { get; }
     
     
     public MainMenu(MainWindow window) : base(window)
     {
-        BackgroundWorld = WorldGenerator.GenerateWorld(Window.View, new(128, 128), null);
+        BackgroundWorld = WorldGenerator.GenerateWorld(Window.View, new(128, 128));
         BackgroundWorld.StartUpdateThreads();
-        
-        Window.View.Center = BackgroundWorld.GetCenterPosition();
-        Window.Closed += (_, _) => BackgroundWorld.EndUpdateThreads();
         
         MenuBackground = new(null, new(), new(220f, 300f))
         {
@@ -40,7 +38,16 @@ public class MainMenu : Area
             AlignmentMargin = new(0f, 20f)
         };
 
+        ExitButton = new (MenuBackground, new(), new(160, 30f), "Exit")
+        {
+            BorderColor = Color.Black,
+            BorderSize = 2f,
+            Alignment = AlignmentType.HorizontalCenter | AlignmentType.Top,
+            AlignmentMargin = new(0f, 70f)
+        };
+
         PlayButton.MouseUpEvent += (_, _) => Window.CurrentArea = new MainGame(Window);
+        ExitButton.MouseUpEvent += (_, _) => Window.Close();
     }
     
 

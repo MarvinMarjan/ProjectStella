@@ -86,11 +86,6 @@ public class MainGame : Area
         Camera.BoundsLimit = new(World.Tiles[0, 0].Position, (Vector2f)World.TileCount * TileDrawable.DefaultTilePixelSize);
         
         World.StartUpdateThreads();
-        
-        Window.Closed += (_, _) => World.EndUpdateThreads();
-        Window.MouseWheelScrolled += (_, args) => Camera.MouseScrollDelta = args.Delta;
-
-        Window.View.Center = World.GetCenterPosition();
     }
     
     

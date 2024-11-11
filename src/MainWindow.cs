@@ -1,9 +1,10 @@
+using System;
+
 using SFML.System;
 using SFML.Window;
 using SFML.Graphics;
 
 using Stella.Areas;
-using Stella.Game;
 
 
 namespace Stella;
@@ -19,6 +20,8 @@ public class MainWindow : RenderWindow
     public Area? CurrentArea { get; set; }
     
     public View View { get; set; }
+
+    public event EventHandler? ClosedEvent;
     
     
     public MainWindow() : base(VideoMode.DesktopMode, "Project Stella", Styles.Default, new()
@@ -52,6 +55,15 @@ public class MainWindow : RenderWindow
         Clear();
         CurrentArea?.Draw(this);
         Display();
+    }
+
+
+    public override void Close()
+    {
+        ClosedEvent?.Invoke(this, EventArgs.Empty);
+        base.Close();
+        
+        Environment.Exit(0); // force exit and any thread alive to abort
     }
     
     
