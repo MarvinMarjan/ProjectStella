@@ -8,17 +8,16 @@
         <RootNamespace>Stella</RootNamespace>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath />
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <OutputPath>bin\Release/</OutputPath>
-    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="SFML.Net" Version="2.6.0" />
+        <PackageReference Include="OpenTK" Version="4.8.2" />
+        <PackageReference Include="SharpNoise" Version="0.12.1.1" />
+    </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SFML.Net" Version="2.6.0" />
-      <PackageReference Include="SharpNoise" Version="0.12.1.1" />
+        <Reference Include="Latte">
+            <HintPath>..\Latte\Latte\bin\Release\net8.0\Latte.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-﻿using Stella.Areas;
+﻿using Latte.Core.Application;
+
+using Stella.Areas;
 
 
 namespace Stella;
@@ -13,13 +15,20 @@ class GameProgram
 {
     private static void Main(string[] args)
     {
-        MainWindow window = new();
-        window.CurrentArea = new MainMenu(window);
+        App.Init(new(ResourceManager.GetFontFilePath("itim.ttf")));
+        App.InitWindow(new MainWindow());
+        
+        MainWindow mainWindow = (App.Window as MainWindow)!;
+        mainWindow.CurrentArea = new MainMenu(mainWindow);
 
-        while (window.IsOpen)
+        while (App.Window.IsOpen)
         {
-            window.Update();
-            window.Draw();
+            App.Window.Clear();
+            
+            App.Update();
+            App.Draw();
+            
+            App.Window.Display();
         }
     }
 }

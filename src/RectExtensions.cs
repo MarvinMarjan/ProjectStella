@@ -2,7 +2,7 @@ using SFML.System;
 using SFML.Graphics;
 
 
-namespace Stella.Game;
+namespace Stella;
 
 
 public static class ViewExtensions

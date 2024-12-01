@@ -1,6 +1,11 @@
+using System;
+
 using SFML.System;
-using SFML.Window;
 using SFML.Graphics;
+using SFML.Window;
+
+
+using Window = Latte.Core.Window;
 
 
 namespace Stella.Game;
@@ -24,36 +29,36 @@ public readonly struct BoundLimitCollisions
 
 public class Camera
 {
-    public MainWindow Window { get; private set; }
+    public Window Window { get; set; }
+    public View View { get; set; }
+
+    public Vector2f WorldMousePosition => Window.MapPixelToCoords(Window.MousePosition, View);
     
     // how much the mouse position changed since the last frame update
-    public Vector2f WorldMousePositionDelta => _oldWorldMousePosition - Window.WorldMousePosition;
+    public Vector2f WorldMousePositionDelta => WorldMousePosition - _oldWorldMousePosition;
     private Vector2f _oldWorldMousePosition;
 
     public float MouseScrollDelta { get; set; }
 
-    public Vector2f DefaultViewSize { get; }
-
-    public FloatRect Bounds => Window.View.ViewToRect();
-    public FloatRect BoundsLimit { get; set; }
+    public FloatRect Bounds => View.ViewToRect();
+    public FloatRect? BoundsLimit { get; set; }
     
-    public float ZoomOutFactor { get; private set; } = 1.2f; 
-    public float ZoomInFactor { get; private set; } = 0.8f;
+    public float ZoomOutFactor { get; private set; } = 1.15f; 
+    public float ZoomInFactor { get; private set; } = 0.85f;
     
-    public float MaxZoomOut { get; private set; } = 8000f;
+    public float MaxZoomOut { get; private set; } = 2600f;
     public float MaxZoomIn { get; private set; } = 100f;
     
-    public bool IsAtMaxZoom => Window.View.Size.X >= MaxZoomOut;
-    public bool IsAtMinZoom => Window.View.Size.Y <= MaxZoomIn;
+    public bool IsAtMaxZoom => View.Size.X >= MaxZoomOut;
+    public bool IsAtMinZoom => View.Size.Y <= MaxZoomIn;
     
     public bool IsGrabbingView => Window.HasFocus() && Mouse.IsButtonPressed(Mouse.Button.Right);
     
     
-    public Camera(MainWindow window)
+    public Camera(Window window, View view)
     {
         Window = window;
-        
-        DefaultViewSize = Window.View.Size;
+        View = view;
         
         Window.MouseWheelScrolled += (_, args) => MouseScrollDelta = args.Delta;
     }
@@ -67,32 +72,39 @@ public class Camera
         if (MouseScrollDelta != 0f && (MouseScrollDelta > 0 ? !IsAtMinZoom : !IsAtMaxZoom))
         {
             float zoom = MouseScrollDelta > 0 ? ZoomInFactor : ZoomOutFactor;
-            Window.View.Zoom(zoom);
+            View.Zoom(zoom);
         }
 
         CheckBoundsLimits();
         
         MouseScrollDelta = 0f;
         
-        _oldWorldMousePosition = Window.WorldMousePosition;
+        _oldWorldMousePosition = WorldMousePosition;
     }
 
     private void ProcessViewGrabMovement()
     {
-        BoundLimitCollisions collisions = GetBoundLimitCollisions();
         Vector2f delta = WorldMousePositionDelta;
+        
+        if (BoundsLimit is not null)
+        {
+            BoundLimitCollisions collisions = GetBoundLimitCollisions();
 
-        if (collisions.LeftRightCollision())
-            delta.X = 0;
+            if (collisions.LeftRightCollision())
+                delta.X = 0;
+
+            if (collisions.TopBottomCollision())
+                delta.Y = 0;
+        }
             
-        if (collisions.TopBottomCollision())
-            delta.Y = 0;
-            
-        Window.View.Move(delta);
+        View.Move(-delta);
     }
     
     private void CheckBoundsLimits()
     {
+        if (BoundsLimit is null)
+            return;
+        
         BoundLimitCollisions collisions = GetBoundLimitCollisions();
 
         bool horizontalLocked = false;
@@ -100,40 +112,42 @@ public class Camera
 
         if (collisions.LeftRightCollision())
         {
-            Window.View.Center = Window.View.Center with { X = BoundsLimit.Position.X + BoundsLimit.Size.X / 2f };
+            View.Center = View.Center with { X = BoundsLimit.Value.Position.X + BoundsLimit.Value.Size.X / 2f };
             horizontalLocked = true;
         }
 
         if (collisions.TopBottomCollision())
         {
-            Window.View.Center = Window.View.Center with { Y = BoundsLimit.Position.Y + BoundsLimit.Size.Y / 2f };
+            View.Center = View.Center with { Y = BoundsLimit.Value.Position.Y + BoundsLimit.Value.Size.Y / 2f };
             verticalLocked = true;
         }
         
         if (collisions.AtLeft && !horizontalLocked)
-            Window.View.MoveToPosition(new(BoundsLimit.Position.X, Bounds.Position.Y));
+            View.MoveToPosition(new(BoundsLimit.Value.Position.X, Bounds.Position.Y));
         
         else if (collisions.AtRight && !horizontalLocked)
-            Window.View.MoveToPosition(new(BoundsLimit.Position.X + BoundsLimit.Width - Bounds.Width, Bounds.Position.Y));
+            View.MoveToPosition(new(BoundsLimit.Value.Position.X + BoundsLimit.Value.Width - Bounds.Width, Bounds.Position.Y));
         
         if (collisions.AtTop && !verticalLocked)
-            Window.View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Position.Y));
+            View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Value.Position.Y));
         
         else if (collisions.AtBottom && !verticalLocked)
-            Window.View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Position.Y + BoundsLimit.Height - Bounds.Height));
+            View.MoveToPosition(new(Bounds.Position.X, BoundsLimit.Value.Position.Y + BoundsLimit.Value.Height - Bounds.Height));
         
     }
 
 
-    private BoundLimitCollisions GetBoundLimitCollisions() => new()
+    private BoundLimitCollisions GetBoundLimitCollisions()
     {
-        AtTop = Bounds.Position.Y < BoundsLimit.Position.Y,
-        AtLeft = Bounds.Position.X < BoundsLimit.Position.X,
-        AtRight = Bounds.Position.X + Bounds.Width > BoundsLimit.Position.X + BoundsLimit.Width,
-        AtBottom = Bounds.Position.Y + Bounds.Height > BoundsLimit.Position.Y + BoundsLimit.Height
-    };
-
-
-    public bool IsRectVisibleToCamera(FloatRect rect)
-        => Window.View.IsRectVisibleToView(rect);
+        if (BoundsLimit is null)
+            throw new NullReferenceException("Bounds limit is not defined.");
+        
+        return new BoundLimitCollisions
+        {
+            AtTop = Bounds.Position.Y < BoundsLimit.Value.Position.Y,
+            AtLeft = Bounds.Position.X < BoundsLimit.Value.Position.X,
+            AtRight = Bounds.Position.X + Bounds.Width > BoundsLimit.Value.Position.X + BoundsLimit.Value.Width,
+            AtBottom = Bounds.Position.Y + Bounds.Height > BoundsLimit.Value.Position.Y + BoundsLimit.Value.Height
+        };
+    }
 }

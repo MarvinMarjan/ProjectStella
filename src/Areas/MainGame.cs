@@ -1,11 +1,14 @@
 using SFML.System;
 using SFML.Graphics;
 
+using Latte.Core;
+using Latte.Core.Application;
+using Latte.Elements;
+using Latte.Elements.Primitives;
+
 using Stella.Game;
 using Stella.Game.Tiles;
 using Stella.Game.World;
-using Stella.UI;
-using Stella.UI.Elements;
 
 
 namespace Stella.Areas;
@@ -20,79 +23,73 @@ namespace Stella.Areas;
 
 public class MainGame : Area
 {
-    public ProgressBarPopup? WorldGenerationProgressPopup { get; private set; }
+    public ProgressBarPopup WorldGenerationProgressPopup { get; }
     public TextElement WorldGenerationStageText { get; }
+    
+    public TileWorld? World => WorldGenerator.TileWorld;
 
-    private WorldGenerator _worldGenerator;
-    public TileWorld? World => _worldGenerator.TileWorld;
-    private bool _worldGenerated;
+    public WorldGenerator WorldGenerator { get; }
+    public bool WorldGenerated { get; private set; }
     
     public Camera? Camera { get; private set; }
     
     
     public MainGame(MainWindow window) : base(window)
     {
-        _worldGenerator = new(Window.View, new(64 * 25, 64 * 25));
-        _worldGenerator.StartWorldGeneration();
+        WorldGenerator = new(App.MainView, new(64 * 20, 64 * 20));
+        WorldGenerator.StartWorldGeneration();
         
         WorldGenerationProgressPopup = new("World Generation Progress");
         WorldGenerationProgressPopup.Show();
 
-        WorldGenerationProgressPopup.UpdateEvent += (_, _) => OnWorldProgressPopupUpdated();
-        WorldGenerationProgressPopup.ClosedEvent += (_, _) => OnWorldGenerated();
+        WorldGenerationProgressPopup.UpdateEvent += (_, _) => OnWorldGenerationProgressPopupUpdate();
+        WorldGenerationProgressPopup.CloseEvent += (_, _) => OnWorldGenerated();
         WorldGenerationProgressPopup.CloseOnComplete = false;
         
         WorldGenerationStageText = new(WorldGenerationProgressPopup, new(), 30, "Starting")
         {
-            Alignment = AlignmentType.Center
+            Alignment = { Value = Alignments.Center }
         };
     }
 
     
     public sealed override void Update()
     {
-        if (_worldGenerated)
+        if (WorldGenerated)
             World?.Update();
 
-        if (WorldGenerationProgressPopup is not null && _worldGenerator.Stage == WorldGenerationStage.Finished)
+        if (WorldGenerator.Stage == WorldGenerationStage.Finished)
             WorldGenerationProgressPopup.Close();
         
         Camera?.Update();
-        WorldGenerationProgressPopup?.Update();
-    }
-
-
-    public sealed override void Draw(RenderTarget target)
-    {
-        if (_worldGenerated)
-            World?.Draw(Window);
-        
-        WorldGenerationProgressPopup?.Draw(target);
     }
     
-    
-    private void OnWorldProgressPopupUpdated()
+    private void OnWorldGenerationProgressPopupUpdate()
     {
-        WorldGenerationStageText.Text.DisplayedString = WorldGenerationStageToString(_worldGenerator.Stage);
+        WorldGenerationStageText.Text.Set(WorldGenerationStageToString(WorldGenerator.Stage));
             
         if (World is not null)
-            WorldGenerationProgressPopup!.ProgressBar.Progress = CalculateWorldGenerationProgress(World);
+            WorldGenerationProgressPopup.ProgressBar.Progress.Set(CalculateWorldGenerationProgress(World));
     }
-
 
     private void OnWorldGenerated()
     {
         if (World is null)
             return;
         
-        WorldGenerationProgressPopup = null;
+        WorldGenerated = true;
         
-        _worldGenerated = true;
-        
-        Camera = new(Window);
+        Camera = new(App.Window, App.MainView);
         Camera.BoundsLimit = new(World.Tiles[0, 0].Position, (Vector2f)World.TileCount * TileDrawable.DefaultTilePixelSize);
         
         World.StartUpdateThreads();
+    }
+
+
+    public sealed override void Draw(RenderTarget target)
+    {
+        if (WorldGenerated)
+            World?.Draw(Window);
     }
     
     

@@ -7,9 +7,9 @@ namespace Stella;
 
 public static class ResourceManager
 {
-    public static string ResourcesDirectory { get; private set; }
-    public static string TilesSpriteDirectory { get; private set; }
-    public static string FontsDirectory { get; private set; }
+    public static string ResourcesDirectory { get; }
+    public static string TilesSpriteDirectory { get; }
+    public static string FontsDirectory { get; }
     
     
     static ResourceManager()
@@ -23,8 +23,8 @@ public static class ResourceManager
     }
 
 
-    public static string GetTileDirectoryPath(string tileName)
-        => Path.Combine(TilesSpriteDirectory, tileName);
+    public static string GetTileDirectoryPath(string tileFileName)
+        => Path.Combine(TilesSpriteDirectory, tileFileName);
     
     public static string GetFontFilePath(string fontFileName)
         => Path.Combine(FontsDirectory, fontFileName);

@@ -1,6 +1,8 @@
 using SFML.System;
 using SFML.Graphics;
 
+using Latte.Core;
+
 using Stella.Game.Tiles;
 
 
