@@ -148,4 +148,29 @@ public class WorldGenerator
                     world.Tiles[row, col].Object = TileIndex.FromNoiseValue(value);
                 }
         });
+    
+    
+    public static float CalculateWorldGenerationProgress(TileWorld world)
+    {
+        uint worldSize = world.TileCount.X * world.TileCount.Y;
+        uint counter = 0;
+        
+        foreach (Tile tile in world.Tiles)
+            if (tile.Object is not null)
+                counter++;
+        
+        return counter / (float)worldSize;
+    }
+
+
+    public static string WorldGenerationStageToString(WorldGenerationStage stage) => stage switch
+    {
+        WorldGenerationStage.None => "Starting",
+        WorldGenerationStage.NoiseGeneration => "Generating noise",
+        WorldGenerationStage.WorldInitialization => "Initializing world",
+        WorldGenerationStage.WorldTerrainFilling => "Filling terrain",
+        WorldGenerationStage.LoadingChunks => "Loading chunks",
+        
+        _ => "Doing something"
+    };
 }

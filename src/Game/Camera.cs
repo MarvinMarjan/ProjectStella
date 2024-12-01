@@ -1,8 +1,9 @@
 using System;
 
-using SFML.System;
 using SFML.Graphics;
 using SFML.Window;
+
+using Latte.Core.Type;
 
 
 using Window = Latte.Core.Window;
@@ -32,11 +33,11 @@ public class Camera
     public Window Window { get; set; }
     public View View { get; set; }
 
-    public Vector2f WorldMousePosition => Window.MapPixelToCoords(Window.MousePosition, View);
+    public Vec2f WorldMousePosition => Window.MapPixelToCoords(Window.MousePosition, View);
     
     // how much the mouse position changed since the last frame update
-    public Vector2f WorldMousePositionDelta => WorldMousePosition - _oldWorldMousePosition;
-    private Vector2f _oldWorldMousePosition;
+    public Vec2f WorldMousePositionDelta => WorldMousePosition - _oldWorldMousePosition;
+    private Vec2f _oldWorldMousePosition;
 
     public float MouseScrollDelta { get; set; }
 
@@ -57,6 +58,8 @@ public class Camera
     
     public Camera(Window window, View view)
     {
+        _oldWorldMousePosition = new();
+        
         Window = window;
         View = view;
         
@@ -84,7 +87,7 @@ public class Camera
 
     private void ProcessViewGrabMovement()
     {
-        Vector2f delta = WorldMousePositionDelta;
+        Vec2f delta = WorldMousePositionDelta;
         
         if (BoundsLimit is not null)
         {

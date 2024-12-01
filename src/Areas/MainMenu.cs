@@ -1,10 +1,12 @@
+using SFML.System;
 using SFML.Graphics;
 
 using Latte.Core;
 using Latte.Core.Application;
-using Latte.Elements.Primitives;
+using Latte.Elements;
 using Latte.Elements.Primitives.Shapes;
 
+using Stella.GUI.MainMenu;
 using Stella.Game.World;
 
 
@@ -15,41 +17,54 @@ public class MainMenu : Area
 {
     public TileWorld BackgroundWorld { get; }
     
+    public TileWorld? World => WorldGenerator.TileWorld;
+    public WorldGenerator WorldGenerator { get; }
+    
     public RectangleElement MenuBackground { get; }
-    public ButtonElement PlayButton { get; }
-    public ButtonElement ExitButton { get; }
+    public GridLayout MenuGrid { get; }
+    public MenuButton PlayButton { get; }
+    public MenuButton ExitButton { get; }
+    
+    public WorldGenerationProgressPopup WorldGenerationProgressPopup { get; }
     
     
     public MainMenu(MainWindow window) : base(window)
     {
         BackgroundWorld = WorldGenerator.GenerateWorld(App.MainView, new(128, 128));
         BackgroundWorld.StartUpdateThreads();
+
+        WorldGenerator = new(App.MainView, new(64 * 20, 64 * 20));
         
-        MenuBackground = new(null, new(), new(220f, 300f))
+        MenuBackground = new(null, new(), new(300f))
         {
-            Alignment = { Value = Alignments.Center },
-            AlignmentMargin = { Value = new(0f, 200f) },
-            Color = { Value = new(50, 50, 50, 150) }
-        };
-        
-        PlayButton = new(MenuBackground, new(), new(160f, 30f), "Play")
-        {
-            BorderColor = { Value = Color.Black },
+            Alignment = { Value = Alignments.VerticalCenter | Alignments.Left },
+            AlignmentMargin = { Value = new(220f) },
+            
             BorderSize = { Value = 2f },
-            Alignment = { Value = Alignments.HorizontalCenter | Alignments.Top },
-            AlignmentMargin = { Value = new(0f, 20f) }
+            BorderColor = { Value = new(0, 0, 0, 180) },
+            Color = { Value = new(0, 0, 0, 120) }
         };
 
-        ExitButton = new (MenuBackground, new(), new(160, 30f), "Exit")
+        MenuBackground.UpdateEvent += (_, _) => MenuBackground.Size.Value.Y = App.Window.Size.Y;
+
+        MenuGrid = new(MenuBackground, new(), 2, 1, 300f, 70f)
         {
-            BorderColor = { Value = Color.Black },
-            BorderSize = { Value = 2f },
-            Alignment = { Value = Alignments.HorizontalCenter | Alignments.Top },
-            AlignmentMargin = { Value = new(0f, 70f) }
+            Alignment = { Value = Alignments.Center }
         };
 
-        PlayButton.MouseUpEvent += (_, _) => Window.CurrentArea = new MainGame(Window);
+        PlayButton = new MenuButton("Play");
+        ExitButton = new MenuButton("Exit");
+
+        MenuGrid.AddElement(PlayButton);
+        MenuGrid.AddElement(ExitButton);
+        
+        PlayButton.MouseUpEvent += (_, _) => WorldGenerationProgressPopup!.Open();
         ExitButton.MouseUpEvent += (_, _) => Window.Close();
+        
+        WorldGenerationProgressPopup = new WorldGenerationProgressPopup(WorldGenerator);
+        WorldGenerationProgressPopup.Close();
+        
+        WorldGenerationProgressPopup.CloseEvent += (_, _) => Window.CurrentArea = new MainGame(Window, World!);
     }
     
 
@@ -57,7 +72,8 @@ public class MainMenu : Area
     {
         base.Deinitialize();
         
-        App.RemoveElement(MenuBackground);    
+        App.RemoveElement(MenuBackground);
+        App.RemoveElement(WorldGenerationProgressPopup);
     }
     
     

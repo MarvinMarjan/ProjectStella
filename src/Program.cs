@@ -13,9 +13,9 @@ namespace Stella;
 
 class GameProgram
 {
-    private static void Main(string[] args)
+    private static void Main()
     {
-        App.Init(new(ResourceManager.GetFontFilePath("itim.ttf")));
+        App.Init(new(ResourceManager.GetFontFilePath("space-grotesk.ttf")));
         App.InitWindow(new MainWindow());
         
         MainWindow mainWindow = (App.Window as MainWindow)!;
