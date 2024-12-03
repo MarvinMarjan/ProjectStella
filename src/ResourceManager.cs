@@ -12,6 +12,8 @@ public static class ResourceManager
     public static string FontsDirectory { get; }
     
     
+    // TODO: use a default system directory
+    
     static ResourceManager()
     {
         // set current directory to project directory

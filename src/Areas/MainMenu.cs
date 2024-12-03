@@ -25,7 +25,7 @@ public class MainMenu : Area
     public MenuButton PlayButton { get; }
     public MenuButton ExitButton { get; }
     
-    public WorldGenerationProgressPopup WorldGenerationProgressPopup { get; }
+    // public WorldGenerationProgressPopup WorldGenerationProgressPopup { get; }
     
     
     public MainMenu(MainWindow window) : base(window)
@@ -58,13 +58,13 @@ public class MainMenu : Area
         MenuGrid.AddElement(PlayButton);
         MenuGrid.AddElement(ExitButton);
         
-        PlayButton.MouseUpEvent += (_, _) => WorldGenerationProgressPopup!.Open();
+        PlayButton.MouseUpEvent += (_, _) => Window.CurrentArea = new WorldMenu(Window, BackgroundWorld);
         ExitButton.MouseUpEvent += (_, _) => Window.Close();
         
-        WorldGenerationProgressPopup = new WorldGenerationProgressPopup(WorldGenerator);
-        WorldGenerationProgressPopup.Close();
-        
-        WorldGenerationProgressPopup.CloseEvent += (_, _) => Window.CurrentArea = new MainGame(Window, World!);
+        // WorldGenerationProgressPopup = new WorldGenerationProgressPopup(WorldGenerator);
+        // WorldGenerationProgressPopup.Close();
+        //
+        // WorldGenerationProgressPopup.CloseEvent += (_, _) => Window.CurrentArea = new MainGame(Window, World!);
     }
     
 
@@ -73,7 +73,7 @@ public class MainMenu : Area
         base.Deinitialize();
         
         App.RemoveElement(MenuBackground);
-        App.RemoveElement(WorldGenerationProgressPopup);
+        // App.RemoveElement(WorldGenerationProgressPopup);
     }
     
     

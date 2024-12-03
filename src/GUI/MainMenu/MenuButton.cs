@@ -1,12 +1,11 @@
 using Latte.Core;
 using Latte.Core.Type;
-using Latte.Elements.Primitives;
 
 
 namespace Stella.GUI.MainMenu;
 
 
-public class MenuButton : ButtonElement
+public class MenuButton : Button
 {
     public MenuButton(string text) : base(null, new(), new(300f, 70f), text)
     {
@@ -20,6 +19,8 @@ public class MenuButton : ButtonElement
         BorderSize.Set(0f);
         BorderColor.Set(SFML.Graphics.Color.Transparent);
         
+        Text.Size.Set(35);
+        
         Hover = new()
         {
             { "Color", new ColorRGBA(0, 0, 0, 80) }
@@ -29,7 +30,5 @@ public class MenuButton : ButtonElement
         {
             { "Color", new ColorRGBA(0, 0, 0, 160) }
         };
-        
-        UseDefaultAnimation = false;
     }
 }
