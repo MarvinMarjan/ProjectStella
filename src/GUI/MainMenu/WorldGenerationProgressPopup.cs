@@ -1,6 +1,5 @@
 using SFML.System;
 
-using Latte.Core;
 using Latte.Core.Application;
 using Latte.Elements;
 using Latte.Elements.Primitives;

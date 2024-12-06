@@ -8,7 +8,7 @@ using Stella.Game.Tiles;
 using Stella.Game.World;
 
 
-namespace Stella.Areas;
+namespace Stella.Sections;
 
 
 // TODO: add ability to change the tiles in the world.
@@ -18,14 +18,14 @@ namespace Stella.Areas;
 // TODO: add lighting (day cycle maybe?)
 
 
-public class MainGame : Area
+public class MainGame : Section
 {
     public TileWorld World { get; }
 
-    public Camera Camera { get; private set; }
+    public Camera Camera { get; }
     
     
-    public MainGame(MainWindow window, TileWorld world) : base(window)
+    public MainGame(TileWorld world)
     {
         World = world;
         World.StartUpdateThreads();
@@ -37,6 +37,8 @@ public class MainGame : Area
     
     public sealed override void Update()
     {
+        base.Update();
+        
         Camera.Update();
         World.Update();
     }
@@ -44,6 +46,8 @@ public class MainGame : Area
 
     public sealed override void Draw(RenderTarget target)
     {
-        World.Draw(Window);
+        base.Draw(target);
+        
+        World.Draw(target);
     }
 }

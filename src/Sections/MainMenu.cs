@@ -1,19 +1,18 @@
-using SFML.System;
 using SFML.Graphics;
 
-using Latte.Core;
 using Latte.Core.Application;
 using Latte.Elements;
+using Latte.Elements.Primitives;
 using Latte.Elements.Primitives.Shapes;
 
-using Stella.GUI.MainMenu;
 using Stella.Game.World;
+using Stella.GUI.MainMenu;
 
 
-namespace Stella.Areas;
+namespace Stella.Sections;
 
 
-public class MainMenu : Area
+public class MainMenu : Section
 {
     public TileWorld BackgroundWorld { get; }
     
@@ -21,14 +20,12 @@ public class MainMenu : Area
     public WorldGenerator WorldGenerator { get; }
     
     public RectangleElement MenuBackground { get; }
-    public GridLayout MenuGrid { get; }
+    public GridLayoutElement MenuGrid { get; }
     public MenuButton PlayButton { get; }
     public MenuButton ExitButton { get; }
     
-    // public WorldGenerationProgressPopup WorldGenerationProgressPopup { get; }
     
-    
-    public MainMenu(MainWindow window) : base(window)
+    public MainMenu()
     {
         BackgroundWorld = WorldGenerator.GenerateWorld(App.MainView, new(128, 128));
         BackgroundWorld.StartUpdateThreads();
@@ -58,33 +55,25 @@ public class MainMenu : Area
         MenuGrid.AddElement(PlayButton);
         MenuGrid.AddElement(ExitButton);
         
-        PlayButton.MouseUpEvent += (_, _) => Window.CurrentArea = new WorldMenu(Window, BackgroundWorld);
-        ExitButton.MouseUpEvent += (_, _) => Window.Close();
+        PlayButton.MouseUpEvent += (_, _) => App.Section = new WorldMenu(BackgroundWorld);
+        ExitButton.MouseUpEvent += (_, _) => App.Window.Close();
         
-        // WorldGenerationProgressPopup = new WorldGenerationProgressPopup(WorldGenerator);
-        // WorldGenerationProgressPopup.Close();
-        //
-        // WorldGenerationProgressPopup.CloseEvent += (_, _) => Window.CurrentArea = new MainGame(Window, World!);
-    }
-    
-
-    public sealed override void Deinitialize()
-    {
-        base.Deinitialize();
-        
-        App.RemoveElement(MenuBackground);
-        // App.RemoveElement(WorldGenerationProgressPopup);
+        AddElement(MenuBackground);
     }
     
     
     public sealed override void Update()
     {
+        base.Update();
+        
         BackgroundWorld.Update();
     }
 
     
     public sealed override void Draw(RenderTarget target)
     {
+        base.Draw(target);
+        
         BackgroundWorld.Draw(target);
     }
 }

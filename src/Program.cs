@@ -1,6 +1,6 @@
 ﻿using Latte.Core.Application;
 
-using Stella.Areas;
+using Stella.Sections;
 
 
 namespace Stella;
@@ -18,8 +18,7 @@ class GameProgram
         App.Init(new(ResourceManager.GetFontFilePath("space-grotesk.ttf")));
         App.InitWindow(new MainWindow());
         
-        MainWindow mainWindow = (App.Window as MainWindow)!;
-        mainWindow.CurrentArea = new MainMenu(mainWindow);
+        App.Section = new MainMenu();
 
         while (App.Window.IsOpen)
         {

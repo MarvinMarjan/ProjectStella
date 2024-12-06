@@ -1,17 +1,17 @@
 using SFML.Graphics;
 
-using Latte.Core;
 using Latte.Core.Application;
+using Latte.Elements;
 using Latte.Elements.Primitives.Shapes;
 
 using Stella.GUI;
 using Stella.Game.World;
 
 
-namespace Stella.Areas;
+namespace Stella.Sections;
 
 
-public class WorldMenu : Area
+public class WorldMenu : Section
 {
     public TileWorld BackgroundWorld { get; }
     
@@ -19,7 +19,7 @@ public class WorldMenu : Area
     public Button NewWorldButton { get; }
     
     
-    public WorldMenu(MainWindow window, TileWorld backgroundWorld) : base(window)
+    public WorldMenu(TileWorld backgroundWorld)
     {
         BackgroundWorld = backgroundWorld;
 
@@ -37,25 +37,23 @@ public class WorldMenu : Area
             Alignment = { Value = Alignments.BottomRight },
             AlignmentMargin = { Value = new(-15, -10) }
         };
-    }
-
-
-    public sealed override void Deinitialize()
-    {
-        base.Deinitialize();
         
-        App.RemoveElement(MainContainer);
+        AddElement(MainContainer);
     }
 
 
     public sealed override void Update()
     {
+        base.Update();
+        
         BackgroundWorld.Update();
     }
 
 
     public sealed override void Draw(RenderTarget target)
     {
+        base.Draw(target);
+        
         BackgroundWorld.Draw(target);
     }
 }
